@@ -1,31 +1,41 @@
-client_id, company_name       , contact_person   , email                            , phone      , industry        , location     , budget, project_type        , timeline, status     , priority, requirements                                             , payment_terms
-C001     , TechCorp Solutions , John Anderson    , john.anderson@techcorp.com       , +1-555-1001, Technology      , San Francisco,  75000, Web Development     , 3 months, active     , high    , "[""React"", ""Node.js"", ""Database""]"                 , Net 30
-C002     , Global Finance LLC , Sarah Mitchell   , sarah.mitchell@globalfinance.com , +1-555-1002, Finance         , New York     , 120000, Financial Software  , 6 months, active     , high    , "[""Security"", ""Compliance"", ""API""]"                , Net 15
-C003     , Healthcare Plus    , Dr. Michael Brown,                                  , +1-555-1003, Healthcare      , Chicago      ,  95000, Patient Management  , 4 months, active     , medium  , "[""HIPAA"", ""Database"", ""Mobile""]"                  , Net 45
-C004     , RetailMax Inc      , Lisa Garcia      , lisa.garcia@retailmax.com        ,            , E-commerce      , Texas        ,  60000, E-commerce Platform , 5 months, pending    , medium  , "[""Payment Gateway"", ""Inventory""]"                   , Net 30
-C005     , StartupHub         , David Kim        , david.kim@startuphub.com         , +1-555-1005, Technology      , California   ,  45000, MVP Development     , 2 months, active     , high    , "[""React"", ""PostgreSQL"", ""AWS""]"                   , Net 15
-C006     , Manufacturing Co   , Jennifer Wilson  , jennifer.wilson@mfg.com          , +1-555-1006, Manufacturing   , Ohio         ,  85000, Inventory System    , 4 months, in-progress, medium  , "[""IoT"", ""Real-time"", ""Analytics""]"                , Net 60
-C007     , EduTech Solutions  , Robert Taylor    , robert.taylor@edutech.com        , +1-555-1007, Education       , Washington   ,  55000, Learning Platform   , 3 months, active     , low     , "[""Video"", ""Interactive"", ""Mobile""]"               , Net 30
-C008     ,                    , Amanda Davis     , amanda.davis@logistics.com       , +1-555-1008, Logistics       , Georgia      ,  70000, Fleet Management    , 5 months, pending    , medium  , "[""GPS"", ""Mobile"", ""Real-time""]"                   , Net 45
-C009     , FoodieApp Inc      , Chris Martinez   , chris.martinez@foodieapp.com     , +1-555-1009, Food & Beverage , California   ,  40000, Food Delivery App   , 2 months, active     , high    , "[""Mobile"", ""Payment"", ""GPS""]"                     , Net 15
-C010     , Real Estate Pro    , Jessica Thompson , jessica.thompson@repro.com       , +1-555-1010, Real Estate     , Florida      ,  65000, Property Management , 4 months, active     , medium  , "[""CRM"", ""Mobile"", ""Reports""]"                     , Net 30
-C011     , Medical Research   , Dr. Kevin White  , kevin.white@medresearch.org      , +1-555-1011, Research        , Massachusetts, 150000, Research Platform   , 8 months, in-progress, high    , "[""Data Analysis"", ""Security"", ""Compliance""]"      , Net 60
-C012     , Smart Home Tech    , Laura Green      , laura.green@smarthome.com        , +1-555-1012, IoT             , Colorado     ,  80000, IoT Platform        , 6 months, active     , medium  , "[""IoT"", ""Mobile"", ""Cloud""]"                       , Net 30
-C013     , Financial Advisory , James Johnson    , james.johnson@finadv.com         , +1-555-1013, Finance         , New York     ,  90000, Portfolio Management, 5 months, pending    , high    , "[""Analytics"", ""Reports"", ""Security""]"             , Net 15
-C014     , Travel Buddy       , Rachel Miller    , rachel.miller@travelbuddy.com    , +1-555-1014, Travel          , Nevada       ,  50000, Travel Planning App , 3 months, active     , medium  , "[""Mobile"", ""Maps"", ""Booking""]"                    , Net 30
-C015     , Fitness First      , Daniel Rodriguez , daniel.rodriguez@fitnessfirst.com, +1-555-1015, Health & Fitness, Arizona      ,  35000, Fitness Tracking    , 2 months, active     , low     , "[""Mobile"", ""Wearables"", ""Analytics""]"             , Net 45
-C016     , BookStore Chain    , Ashley Clark     , ashley.clark@bookstore.com       , +1-555-1016, Retail          , Oregon       ,  55000, Inventory & Sales   , 4 months, in-progress, medium  , "[""POS"", ""Inventory"", ""Reports""]"                  , Net 30
-C017     , Auto Repair Network, Ryan Lewis       , ryan.lewis@autorepair.com        , +1-555-1017, Automotive      , Michigan     ,  70000, Service Management  , 5 months, pending    , medium  , "[""Scheduling"", ""Inventory"", ""Mobile""]"            , Net 60
-C018     , Legal Services     , Nicole Walker    ,                                  , +1-555-1018, Legal           , Illinois     , 100000, Case Management     , 6 months, active     , high    , "[""Document Management"", ""Security"", ""Compliance""]", Net 30
-C019     , Event Planning Co  , Brandon Hall     , brandon.hall@eventplanning.com   , +1-555-1019, Events          , California   ,  45000, Event Management    , 3 months, active     , medium  , "[""Booking"", ""Payment"", ""Mobile""]"                 , Net 15
-C020     , Construction Corp  , Amanda Young     , amanda.young@construction.com    , +1-555-1020, Construction    , Texas        ,  95000, Project Management  , 7 months, in-progress, high    , "[""Project Tracking"", ""Resource Management""]"        , Net 45
-C021     , Pet Care Services  , Justin Allen     , justin.allen@petcare.com         , +1-555-1021, Pet Services    , Washington   ,  30000, Appointment System  , 2 months, active     , low     , "[""Scheduling"", ""Mobile"", ""Notifications""]"        , Net 30
-C022     , Photography Studio , Megan King       , megan.king@photostudio.com       , +1-555-1022, Photography     , New York     ,  25000, Portfolio Website   , 1 month , completed  , low     , "[""Gallery"", ""Booking"", ""Payment""]"                , Net 15
-C023     , Consulting Firm    , Tyler Wright     , tyler.wright@consulting.com      , +1-555-1023, Consulting      , Virginia     , 110000, CRM System          , 5 months, active     , high    , "[""CRM"", ""Analytics"", ""Reports""]"                  , Net 30
-C024     , Fashion Boutique   , Hannah Lopez     , hannah.lopez@fashion.com         , +1-555-1024, Fashion         , California   ,  40000, E-commerce Site     , 3 months, pending    , medium  , "[""E-commerce"", ""Mobile"", ""Social Media""]"         , Net 45
-C025     , Dental Practice    , Eric Hill        , eric.hill@dental.com             , +1-555-1025, Healthcare      , Florida      ,  60000, Practice Management , 4 months, active     , medium  , "[""Appointments"", ""Billing"", ""Patient Records""]"   , Net 30
-C026     , Music School       , Stephanie Scott  , stephanie.scott@musicschool.com  , +1-555-1026, Education       , Oregon       ,  35000, Student Management  , 3 months, in-progress, low     , "[""Scheduling"", ""Payments"", ""Progress Tracking""]"  , Net 60
-C027     , Delivery Service   , Mark Adams       , mark.adams@delivery.com          , +1-555-1027, Logistics       , Arizona      ,  85000, Delivery Platform   , 6 months, active     , high    , "[""Route Optimization"", ""Real-time Tracking""]"       , Net 15
-C028     ,                    , Nicole Baker     , nicole.baker@marketing.com       , +1-555-1028, Marketing       , California   ,  50000, Campaign Management , 4 months, pending    , medium  , "[""Analytics"", ""Social Media"", ""Reports""]"         , Net 30
-C029     , Insurance Agency   , Brandon Turner   , brandon.turner@insurance.com     , +1-555-1029, Insurance       , Illinois     ,  80000, Policy Management   , 5 months, active     , high    , "[""Claims Processing"", ""Customer Portal""]"           , Net 45
-C030     , Gym Chain          , Amanda Phillips  , amanda.phillips@gymchain.com     , +1-555-1030, Fitness         , Texas        ,  70000, Member Management   , 4 months, in-progress, medium  , "[""Membership"", ""Scheduling"", ""Payment""]"          , Net 30
+ClientID, ClientName   , PriorityLevel, RequestedTaskIDs, GroupTag                               , AttributesJSON
+       1, Alpha Corp   ,             1, "T101,T102"     , A                                      , "{""location"": ""USA"", ""tier"": 1}"
+       2, Beta LLC     ,             2, "T103"          , B                                      , "{""location"": ""EU"", ""tier"": 2}"
+       3, Gamma Inc    ,             6, "T104,T105"     , A                                      , "{""location"": ""USA"", ""tier"": 1}"
+       4, Delta Co     ,             3, "T106-T107"     , C                                      , "{""location"": ""ASIA"", ""tier"": 3"
+       5, Epsilon Ltd  ,             4, "T108"          ,                                        , "{""location"": ""EU"", ""tier"": 2}"
+       6, Zeta Group   ,             2, "T109"          , B                                      , 
+       7, Eta Solutions,             3, "T110"          , C                                      , "{""location"": ""USA"", ""tier"": 1, ""notes"": ""special handling""}"
+       8, Theta Ent    ,              , "T111,T112"     , A                                      , "{""location"": ""EU""}"
+       9, Iota Services,             5, T113            , "{""location"": ""ASIA"", ""tier"": 3}"
+      10, Kappa Co     ,             1, "T114,T115"     , B                                      , "{""location"": ""USA"", ""active"": false}"
+      11, Lambda Inc.  ,             3, "T116,T117"     , A                                      , "{""location"": ""EU"", ""tier"": 2}"
+      12, Mu Group     ,             2, "T118"          , C                                      , "{""location"": ""ASIA"", ""tier"": 3}"
+      13, Nu Solutions ,             4, "T119,T120"     , B                                      , "{""location"": ""USA"", ""tier"": 1}"
+      14, Xi Ent       ,             1, "T121"          , A                                      , "{""location"": ""EU""}"
+      15, Omicron Co   ,             5, "T122,T123"     , C                                      , "{""location"": ""ASIA"", ""tier"": 3, ""notes"": ""high priority""}"
+      16, Pi Services  ,             2, "T124"          , B                                      , "{""location"": ""USA"", ""tier"": 2}"
+      17, Rho Ltd      ,             3, "T125,T126"     , A                                      , 
+      18, Sigma Corp   ,             4, "T127"          , C                                      , "{""location"": ""EU"", ""tier"": 1}"
+      19, Tau LLC      ,             1, "T128,T129"     , B                                      , "{""location"": ""ASIA"", ""tier"": 3}"
+      20, Upsilon Inc  ,             2, "T130"          , A                                      , "{""location"": ""USA"", ""tier"": 1, ""active"": true}"
+      21, Phi Group    ,             3, "T131,T132"     , C                                      , "{""location"": ""EU"", ""tier"": 2}"
+      22, Chi Solutions,             5, "T133"          , B                                      , "{""location"": ""ASIA""}"
+      23, Psi Ent      ,             1, "T134,T135"     , A                                      , "{""location"": ""USA"", ""tier"": 1}"
+      24, Omega Co     ,             4, "T136"          , C                                      , "{""location"": ""EU"", ""tier"": 3}"
+      25, Alpha Corp   ,             2, "T137,T138"     , A                                      , "{""location"": ""USA"", ""tier"": 1}"
+      26, Beta LLC     ,             3, "T139"          , B                                      , "{""location"": ""EU"", ""tier"": 2}"
+      27, Gamma Inc    ,             1, "T140,T141"     , A                                      , "{""location"": ""USA"", ""tier"": 1}"
+      28, Delta Co     ,             5, "T142"          , C                                      , "{""location"": ""ASIA"", ""tier"": 3}"
+      29, Epsilon Ltd  ,             2, "T143,T144"     , B                                      , "{""location"": ""EU"", ""tier"": 2}"
+      30, Zeta Group   ,             4, "T145"          , A                                      , "{""location"": ""USA"", ""tier"": 1}"
+      31, Eta Solutions,             1, "T146,T147"     , C                                      , "{""location"": ""EU"", ""tier"": 3, ""notes"": ""urgent""}"
+      32, Theta Ent    ,             3, "T148"          , B                                      , "{""location"": ""ASIA""}"
+      33, Iota Services,             2, "T149,T150"     , A                                      , "{""location"": ""USA"", ""tier"": 1}"
+      34, Kappa Co     ,             5, "T151"          , C                                      , "{""location"": ""EU"", ""tier"": 2}"
+      35, Lambda Inc.  ,             1, "T152,T153"     , B                                      , "{""location"": ""ASIA"", ""tier"": 3}"
+      36, Mu Group     ,             4, "T154"          , A                                      , "{""location"": ""USA"", ""tier"": 1}"
+      37, Nu Solutions ,             2, "T155,T156"     , C                                      , "{""location"": ""EU""}"
+      38, Xi Ent       ,             3, "T157"          , B                                      , "{""location"": ""ASIA"", ""tier"": 3}"
+      39, Omicron Co   ,             1, "T158,T159"     , A                                      , "{""location"": ""USA"", ""tier"": 1, ""active"": false}"
+      40, Pi Services  ,             5, "T160"          , C                                      , "{""location"": ""EU"", ""tier"": 2}"

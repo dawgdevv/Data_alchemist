@@ -1,31 +1,41 @@
-id, name           , email                    , hourly_rate, skills                                                                   , availability, location      , experience_years, certification          , phone      , status
- 1, John Smith     , john.smith@email.com     ,       25.50, "[""JavaScript"", ""React"", ""Node.js""]"                               , full-time   , New York      ,                5, AWS Certified          , +1-555-0101, active
- 2, Sarah Johnson  , sarah.j@email.com        ,       30.00, "[""Python"", ""Django"", ""PostgreSQL""]"                               , part-time   , California    ,                7, Google Cloud           , +1-555-0102, active
- 3, Mike Davis     , mike.davis@email.com     ,       22.75, "[""HTML"", ""CSS"", ""JavaScript"""                                     , full-time   , Texas         ,                3,                        , +1-555-0103, active
- 4, Emily Wilson   , emily.wilson@email.com   ,            , "[""React"", ""Vue.js"", ""TypeScript""]"                                , full-time   , Florida       ,                4, Meta Certified         , +1-555-0104, active
- 5, David Brown    , david.brown@email.com    ,       28.25, "[""PHP"", ""Laravel"", ""MySQL""]"                                      , part-time   , Illinois      ,                6, Zend Certified         , +1-555-0105, active
- 6, Lisa Garcia    , lisa.garcia@email.com    ,       26.50, "{""primary"": ""Python"", ""secondary"": [""FastAPI"", ""SQLAlchemy""]}", full-time   , Washington    ,                5, Python Institute       , +1-555-0106, active
- 7, Tom Anderson   , tom.anderson@email.com   ,       24.00, "[""Java"", ""Spring Boot"", ""Maven""]"                                 , full-time   , Oregon        ,                4,                        , +1-555-0107, active
- 8, Amy Taylor     , amy.taylor@email.com     ,       32.00, "[""C#"", "".NET"", ""Entity Framework""]"                               , part-time   , Nevada        ,                8, Microsoft Certified    , +1-555-0108, active
- 9, Chris Martinez , chris.martinez@email.com ,       27.50, "[""Ruby"", ""Rails"", ""RSpec""]"                                       , full-time   , Colorado      ,                6,                        , +1-555-0109, inactive
-10, Jessica Lee    , jessica.lee@email.com    ,       29.75, "[""Angular"", ""TypeScript"", ""RxJS""]"                                , full-time   , Arizona       ,                7, Angular Certified      , +1-555-0110, active
-11, Robert Kim     , robert.kim@email.com     ,       23.25, "[""Vue.js"", ""Nuxt.js"", ""Vuex""]"                                    , part-time   , Utah          ,                3,                        , +1-555-0111, active
-12, Maria Rodriguez,                          ,       26.00, "[""Swift"", ""iOS"", ""Xcode""]"                                        , full-time   , New Mexico    ,                5, Apple Developer        , +1-555-0112, active
-13, Kevin White    , kevin.white@email.com    ,       31.50, "[""Kotlin"", ""Android"", ""Firebase""]"                                , full-time   , Montana       ,                8, Google Android         , +1-555-0113, active
-14, Laura Thompson , laura.thompson@email.com ,       25.75, "[""Flutter"", ""Dart"", ""Mobile Development""]"                        , part-time   , Idaho         ,                4,                        , +1-555-0114, active
-15, James Wilson   , james.wilson@email.com   ,            , "[""DevOps"", ""Docker"", ""Kubernetes""]"                               , full-time   , Wyoming       ,                6, Docker Certified       , +1-555-0115, active
-16, Rachel Green   , rachel.green@email.com   ,       33.00, "[""Data Science"", ""Python"", ""Pandas""]"                             , full-time   , Vermont       ,                9, Kaggle Expert          , +1-555-0116, active
-17, Daniel Clark   , daniel.clark@email.com   ,       24.50, "[""Machine Learning"", ""TensorFlow"", ""PyTorch"""                     , part-time   , Maine         ,                5,                        , +1-555-0117, active
-18, Ashley Davis   , ashley.davis@email.com   ,       28.00, "[""UI/UX"", ""Figma"", ""Adobe XD""]"                                   , full-time   , New Hampshire ,                6, Adobe Certified        , +1-555-0118, active
-19, Ryan Martinez  , ryan.martinez@email.com  ,       26.75, "[""Cybersecurity"", ""Penetration Testing"", ""CISSP""]"                , part-time   , Rhode Island  ,                7, CISSP Certified        , +1-555-0119, active
-20, Stephanie Brown, stephanie.brown@email.com,       30.25, "[""Blockchain"", ""Solidity"", ""Web3""]"                               , full-time   , Connecticut   ,                5,                        , +1-555-0120, active
-21, Mark Johnson   , mark.johnson@email.com   ,       22.00, "[""QA Testing"", ""Selenium"", ""Jest""]"                               , full-time   , Delaware      ,                3, ISTQB Certified        , +1-555-0121, active
-22, Nicole Taylor  , nicole.taylor@email.com  ,       27.25, null                                                                     , part-time   , Maryland      ,                6,                        , +1-555-0122, active
-23, Brandon Lee    , brandon.lee@email.com    ,       29.50, "[""GraphQL"", ""Apollo"", ""Prisma""]"                                  , full-time   , Virginia      ,                7, GraphQL Certified      , +1-555-0123, inactive
-24, Amanda Wilson  , amanda.wilson@email.com  ,       25.00, "[""Microservices"", ""Spring Cloud"", ""Eureka""]"                      , full-time   , North Carolina,                4,                        , +1-555-0124, active
-25, Justin Garcia  , justin.garcia@email.com  ,       31.00, "[""Cloud Architecture"", ""AWS"", ""Terraform""]"                       , part-time   , South Carolina,                8, AWS Solutions Architect, +1-555-0125, active
-26,                , anna.rodriguez@email.com ,       26.25, "[""Serverless"", ""Lambda"", ""API Gateway""]"                          , full-time   , Georgia       ,                5, AWS Developer          , +1-555-0126, active
-27, Eric Thompson  , eric.thompson@email.com  ,       24.75, "[""Big Data"", ""Spark"", ""Hadoop""]"                                  , full-time   , Alabama       ,                6,                        , +1-555-0127, active
-28, Megan Davis    , megan.davis@email.com    ,       28.50, "[""ETL"", ""Airflow"", ""dbt""]"                                        , part-time   , Mississippi   ,                7, Airflow Certified      , +1-555-0128, active
-29, Tyler Wilson   , tyler.wilson@email.com   ,       23.75, "[""Analytics"", ""SQL"", ""Tableau""]"                                  , full-time   , Tennessee     ,                4, Tableau Desktop        , +1-555-0129, active
-30, Hannah Martinez, hannah.martinez@email.com,       32.50, "[""Project Management"", ""Agile"", ""Scrum""]"                         , full-time   , Kentucky      ,                9, PMP Certified          , +1-555-0130, active
+WorkerID,WorkerName,Skills,AvailableSlots,MaxLoadPerPhase,WorkerGroup,QualificationLevel
+1,John Smith,"Java,Python","[1,2,3]",5,A,5
+2,Jane Doe,"SQL,BI","[4,5]",4,B,4
+3,Peter Jones,"Java,C++","1-3",6,A,5
+4,Mary Brown,,"[2,4]",5,C,3
+5,David Wilson,"Python,R",-1,"[1,5]",3,B,4
+6,Susan Taylor,"SQL,Tableau","[3,4,5]",4,C,4
+7,Michael Miller,"Java","[1,2]",6,"Expert",A
+8,Karen Davis,"Python",,5,B,3
+9,James White,"C++,SQL","[2,3,4]",5,A,5
+10,Patricia Green,"BI,R","[1,4,5]",3,,2
+11,Robert Hall,"Java,SQL","[1,3,5]",5,A,5
+12,Linda Harris,"Python,Tableau","[2,4]",4,B,4
+13,Joseph Clark,"C++,BI","1-4",6,A,5
+14,Barbara Lewis,"R,SQL",,"[1,5]",5,C,3
+15,Thomas Walker,"Java",-1,"[2,3,4]",4,B,4
+16,Nancy Allen,"Python,C++","[1,3]",6,A,5
+17,Daniel Young,"SQL,BI","[4,5]",3,"Specialist",C
+18,Betty King,"Java,R",,5,B,3
+19,Paul Wright,"C++,Python","[1,2,5]",5,A,5
+20,Sandra Hill,"Tableau,SQL","[3,4]",4,,2
+21,Mark Scott,"Java,Python","[1,4,5]",5,A,5
+22,Ashley Adams,"SQL,R","[2,3]",4,B,4
+23,Steven Baker,"C++,Tableau","2-5",6,A,5
+24,Kimberly Carter,"Python,BI",,"[1,3]",5,C,3
+25,Andrew Mitchell,"Java",-1,"[2,4,5]",4,B,4
+26,Melissa Perez,"C++,SQL","[1,2]",6,A,5
+27,Joshua Roberts,"Python,R","[3,5]",3,"Lead",C
+28,Emily Turner,"Java,Tableau",,5,B,3
+29,Brian Phillips,"C++,BI","[1,3,4]",5,A,5
+30,Rebecca Campbell,"SQL,Python","[2,5]",4,,2
+31,Brandon Parker,"Java,R","[1,3,5]",5,A,5
+32,Lauren Evans,"Python,C++","[2,4]",4,B,4
+33,Justin Edwards,"SQL,Tableau","3-5",6,A,5
+34,Heather Collins,"BI,R",,"[1,2]",5,C,3
+35,Ryan Stewart,"Java",-1,"[3,4,5]",4,B,4
+36,Rachel Morris,"Python,SQL","[1,5]",6,A,5
+37,Gary Rogers,"C++,BI","[2,3]",3,"Senior",C
+38,Nicole Reed,"Java,Python",,5,B,3
+39,Jacob Cook,"SQL,R","[1,4]",5,A,5
+40,Brittany Morgan,"Tableau,C++","[2,5]",4,,2

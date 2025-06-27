@@ -1,31 +1,41 @@
-task_id, name                    , description                                          , duration, priority, phase, status     , required_skills                                                        , complexity, deadline  , worker_id, estimated_effort, category
-T001   , Frontend Development    , Develop responsive user interface for dashboard      ,      4.5, high    ,     1, pending    , "[""React"", ""CSS"", ""JavaScript""]"                                 , medium    , 2025-07-15,         1, high            , development
-T002   , Backend API             , Create RESTful API endpoints for user management     ,      6.0, high    ,     1, in-progress, "[""Node.js"", ""Express"", ""MongoDB""]"                              , high      , 2025-07-20,         2, high            , development
-T003   , Database Design         , Design and implement database schema                 ,      3.5, medium  ,     1, completed  , "[""PostgreSQL"", ""SQL"", ""Database Design""]"                       , medium    , 2025-07-10,         3, medium          , architecture
-T004   , Authentication System   , Implement OAuth 2.0 authentication                   ,      5.0, high    ,     2, pending    , "[""Security"", ""OAuth"", ""JWT""]"                                   , high      , 2025-07-25,         4, high            , security
-T005   , Data Validation         , Create data validation rules and middleware          ,      2.5, low     ,     1, pending    , "[""JavaScript"", ""Validation"", ""Middleware""]"                     , low       , 2025-07-12,         5, low             , development
-T006   , Unit Testing            , Write comprehensive unit tests for API endpoints     ,      3.0, medium  ,     2, in-progress, "[""Jest"", ""Testing"", ""TDD""]"                                     , medium    , 2025-07-18,         6, medium          , testing
-T007   , Performance Optimization, Optimize database queries and API response times     ,      4.0, high    ,     2, pending    , "[""Performance"", ""SQL Optimization"", ""Caching""]"                 , high      , 2025-07-22,         7, high            , optimization
-T008   , Mobile Responsiveness   , Ensure application works on mobile devices           ,      2.0, medium  ,     1, completed  , "[""CSS"", ""Mobile Design"", ""Responsive""]"                         , low       , 2025-07-08,         8, low             , ui/ux
-T009   , Documentation           , Create comprehensive API documentation               ,      1.5, low     ,     3, pending    , "[""Technical Writing"", ""API Documentation""]"                       , low       , 2025-07-30,         9, low             , documentation
-T010   , Code Review             , Review and refactor existing codebase                ,      3.5, medium  ,     2, in-progress, "[""Code Review"", ""Refactoring"", ""Best Practices""]"               , medium    , 2025-07-16,        10, medium          , quality
-T011   , Integration Testing     , Implement end-to-end integration tests               ,      4.5, high    ,     2, pending    , "[""Selenium"", ""Integration Testing"", ""Automation""]"              , high      , 2025-07-28,        11, high            , testing
-T012   , Security Audit          , Conduct security audit and vulnerability assessment  ,      6.0, high    ,     3, pending    , "[""Security"", ""Penetration Testing"", ""Vulnerability Assessment""]", high      , 2025-08-05,        12, high            , security
-T013   , Deployment Pipeline     , Set up CI/CD pipeline for automated deployment       ,      5.5, high    ,     3, in-progress, "[""DevOps"", ""CI/CD"", ""Docker"", ""Kubernetes""]"                  , high      , 2025-08-01,        13, high            , devops
-T014   , Monitoring Setup        , Implement application monitoring and logging         ,      3.0, medium  ,     3, pending    , "[""Monitoring"", ""Logging"", ""Grafana"", ""Prometheus""]"           , medium    , 2025-07-26,        14, medium          , monitoring
-T015   , Load Testing            , Perform load testing and capacity planning           ,      2.5, medium  ,     2, pending    , "[""Load Testing"", ""Performance"", ""JMeter""]"                      , medium    , 2025-07-24,        15, medium          , testing
-T016   , Backup Strategy         , Implement automated backup and recovery system       ,      4.0, high    ,     3, pending    , "[""Backup"", ""Disaster Recovery"", ""Automation""]"                  , high      , 2025-08-10,        16, high            , infrastructure
-T017   , User Training           , Create user training materials and conduct sessions  ,      2.0, low     ,     3, pending    , "[""Training"", ""Documentation"", ""User Support""]"                  , low       , 2025-08-15,        17, low             , training
-T018   , Bug Fixes               , Fix reported bugs and issues from testing phase      ,      1.5, high    ,     2, in-progress, "[""Debugging"", ""Problem Solving""]"                                 , medium    , 2025-07-14,        18, medium          , maintenance
-T019   , Feature Enhancement     , Add new features based on user feedback              ,      5.0, medium  ,     2, pending    , "[""Feature Development"", ""User Experience""]"                       , medium    , 2025-07-21,        19, medium          , enhancement
-T020   , Data Migration          , Migrate data from legacy system to new platform      ,      6.5, high    ,     1, completed  , "[""Data Migration"", ""ETL"", ""SQL""]"                               , high      , 2025-07-05,        20, high            , migration
-T021   , API Rate Limiting       , Implement rate limiting for API endpoints            ,      1.5, low     ,     2, pending    , "[""API Security"", ""Rate Limiting"", ""Middleware""]"                , low       , 2025-07-19,        21, low             , security
-T022   , Caching Implementation  , Implement Redis caching for improved performance     ,      3.0, medium  ,     2, in-progress, "[""Redis"", ""Caching"", ""Performance""]"                            , medium    , 2025-07-17,        22, medium          , optimization
-T023   , Email Notifications     , Set up email notification system                     ,      2.5, low     ,     1, completed  , "[""Email"", ""Notifications"", ""SMTP""]"                             , low       , 2025-07-06,        23, low             , communication
-T024   , Search Functionality    , Implement advanced search and filtering              ,      4.0, medium  ,     2, pending    , "[""Search"", ""Elasticsearch"", ""Indexing""]"                        , medium    , 2025-07-23,        24, medium          , feature
-T025   , Internationalization    , Add multi-language support to application            ,      3.5, low     ,     3, pending    , "[""i18n"", ""Localization"", ""Translation""]"                        , medium    , 2025-08-12,        25, medium          , localization
-T026   , Analytics Dashboard     , Create analytics dashboard for business metrics      ,      5.5, high    ,     3, pending    , "[""Analytics"", ""Dashboard"", ""Data Visualization""]"               , high      , 2025-08-08,        26, high            , analytics
-T027   , Payment Integration     , Integrate payment gateway for transactions           ,      4.5, high    ,     2, in-progress, "[""Payment Gateway"", ""Stripe"", ""Financial""]"                     , high      , 2025-07-27,        27, high            , integration
-T028   , Social Media Integration, Add social media login and sharing features          ,      3.0, medium  ,     3, pending    , "[""Social Media"", ""OAuth"", ""API Integration""]"                   , medium    , 2025-08-03,        28, medium          , integration
-T029   , Automated Reporting     , Set up automated report generation                   ,      2.5, medium  ,     3, pending    , "[""Reporting"", ""Automation"", ""Scheduling""]"                      , medium    , 2025-08-06,        29, medium          , reporting
-T030   , Final Testing           , Comprehensive final testing before production release,      4.0, high    ,     3, pending    , "[""QA"", ""Testing"", ""Production Ready""]"                          , high      , 2025-08-20,        30, high            , testing
+TaskID,TaskName,Category,Duration,RequiredSkills,PreferredPhases,MaxConcurrent
+T101,Data Migration,ETL,5,"SQL,Python","1-2",4
+T102,Data Analysis,Analytics,3,"Python,R","[3,4]",2
+T103,BI Dashboard,Reporting,0,"Tableau,SQL","3-5",1
+T104,Feature Engineering,ML,6,"Python","[1,6]",3
+T105,API Development,Backend,,"Java,Python","2-4",5
+T106,Data Validation,QA,2,"SQL","[1,3,5]",4
+T107,Report Generation,Reporting,3,"BI","4-5","three"
+T108,Model Training,ML,8,"Python,R",,2
+T109,Database Indexing,DBA,2.5,"SQL","1-3",3
+T110,Data Cleansing,ETL,4,"Python","[2,4]",5
+T111,Schema Migration,DBA,3,"SQL","1-3",2
+T112,Performance Tuning,DBA,5,"SQL,Python","2-4",1
+T113,Data Archiving,ETL,6,"SQL","[4,5]",3
+T114,Real-time Dashboard,Reporting,4,"Tableau,SQL","3-5",2
+T115,A/B Testing Analysis,Analytics,3,"Python,R","[1,2]",4
+T116,Log Processing,ETL,4,"Python","1-4",5
+T117,Custom BI Report,Reporting,2,"BI,SQL","[3,5]",1
+T118,Model Deployment,ML,5,"Python","4-6",2
+T119,ETL Optimization,ETL,7,"SQL,Python","[1,3]",3
+T120,User Segmentation,Analytics,4,"Python,R","2-4",4
+T121,Backend Refactoring,Backend,8,"Java","[1,6]",2
+T122,Security Patching,Backend,2,"Java,Python","3-4",5
+T123,Data Governance,QA,3,"SQL","[1,2,3]",4
+T124,Ad-hoc Analysis,Analytics,2,"SQL,BI","4-5",2
+T125,Predictive Maintenance,ML,9,"Python,R",,1
+T126,Cloud Migration,ETL,10,"SQL,Python","1-5",3
+T127,Stream Processing,Backend,6,"Java","[2,4,6]",2
+T128,Data Cataloging,DBA,3,"SQL","1-3",4
+T129,Anomaly Detection,ML,5,"Python","[3,5]",3
+T130,Batch Processing,ETL,4,"Python","2-4",5
+T131,Financial Reporting,Reporting,3,"BI,SQL","[1,4]",1
+T132,Customer Churn,Analytics,4,"Python,R","3-5",2
+T133,Microservice Dev,Backend,7,"Java","[2,6]",3
+T134,Load Testing,QA,2,"Python","1-3",5
+T135,Data Lineage,DBA,3,"SQL","[2,4]",4
+T136,Sentiment Analysis,ML,5,"Python,R","3-6",2
+T137,Dashboard Revamp,Reporting,4,"Tableau,BI","[1,5]",1
+T138,Feature Store,ML,6,"Python,SQL","2-5",3
+T139,Compliance Check,QA,2,"SQL","[1,4]",4
+T140,Data Ingestion,ETL,3,"Python","1-3",5
