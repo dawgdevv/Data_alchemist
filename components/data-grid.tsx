@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Edit3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, Edit3, Check, X, Save } from "lucide-react";
 import { useSession } from "@/hooks/use-session";
 
 interface ValidationError {
@@ -23,22 +24,33 @@ interface ValidationError {
 interface DataGridProps {
   validationErrors?: { [key: string]: number };
   validationDetails?: ValidationError[];
+  onDataChange?: (file: string, data: any[]) => void;
 }
 
 export default function DataGrid({
   validationErrors = {},
   validationDetails = [],
+  onDataChange,
 }: DataGridProps) {
-  const { sessionData } = useSession();
+  const { sessionData, updateSessionData } = useSession();
   const [editingCell, setEditingCell] = useState<{
     row: number;
     col: string;
     table: string;
   } | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [hoveredError, setHoveredError] = useState<string | null>(null);
+  const editInputRef = useRef<HTMLInputElement>(null);
 
   const availableTables = Object.keys(sessionData).filter(
     (key) => sessionData[key]
   );
+
+  useEffect(() => {
+    if (editingCell && editInputRef.current) {
+      editInputRef.current.focus();
+    }
+  }, [editingCell]);
 
   const getCellValidationError = (
     tableKey: string,
@@ -51,6 +63,59 @@ export default function DataGrid({
         error.row === rowIndex &&
         error.column === column
     );
+  };
+
+  const handleCellEdit = (
+    tableKey: string,
+    rowIndex: number,
+    column: string,
+    currentValue: any
+  ) => {
+    setEditingCell({ row: rowIndex, col: column, table: tableKey });
+    setEditValue(currentValue || "");
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingCell) return;
+
+    const { row, col, table } = editingCell;
+    const tableData = sessionData[table];
+
+    if (!tableData) return;
+
+    // Update the data
+    const updatedData = [...tableData.data];
+    updatedData[row] = {
+      ...updatedData[row],
+      [col]: editValue,
+    };
+
+    // Update session data
+    await updateSessionData(table, {
+      ...tableData,
+      data: updatedData,
+    });
+
+    // Notify parent component
+    onDataChange?.(table, updatedData);
+
+    setEditingCell(null);
+    setEditValue("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCell(null);
+    setEditValue("");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSaveEdit();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      handleCancelEdit();
+    }
   };
 
   const renderTable = (tableKey: string) => {
@@ -84,7 +149,7 @@ export default function DataGrid({
             {data.map((row, rowIndex) => (
               <tr
                 key={rowIndex}
-                className="border-b border-[#313244] hover:bg-[#45475a]/30"
+                className="border-b border-[#313244] hover:bg-[#45475a]/20"
               >
                 {headers.map((header) => {
                   const cellError = getCellValidationError(
@@ -93,69 +158,101 @@ export default function DataGrid({
                     header
                   );
                   const hasError = !!cellError;
+                  const isEditing =
+                    editingCell?.row === rowIndex &&
+                    editingCell?.col === header &&
+                    editingCell?.table === tableKey;
+                  const cellId = `${tableKey}-${rowIndex}-${header}`;
 
                   return (
                     <td
                       key={header}
-                      className={`p-3 relative group ${
+                      className={`p-3 relative ${
                         hasError ? "bg-[#f38ba8]/10" : ""
                       }`}
                     >
-                      <div className="flex items-center space-x-2">
-                        {editingCell?.row === rowIndex &&
-                        editingCell?.col === header &&
-                        editingCell?.table === tableKey ? (
+                      {isEditing ? (
+                        <div className="flex items-center space-x-2">
                           <Input
-                            defaultValue={row[header] || ""}
-                            className="h-8 bg-[#1e1e2e] border-[#cba6f7] text-[#cdd6f4]"
-                            onBlur={() => setEditingCell(null)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") setEditingCell(null);
-                            }}
-                            autoFocus
+                            ref={editInputRef}
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            className="h-8 bg-[#1e1e2e] border-[#cba6f7] text-[#cdd6f4] text-sm"
+                            placeholder="Enter value..."
                           />
-                        ) : (
-                          <>
+                          <Button
+                            size="sm"
+                            onClick={handleSaveEdit}
+                            className="h-8 w-8 p-0 bg-[#a6e3a1] text-[#1e1e2e] hover:bg-[#a6e3a1]/90"
+                          >
+                            <Check className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={handleCancelEdit}
+                            className="h-8 w-8 p-0 bg-[#f38ba8] text-[#1e1e2e] hover:bg-[#f38ba8]/90 border-[#f38ba8]"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="group flex items-center justify-between">
+                          <div className="flex items-center space-x-2 flex-1">
                             <span
                               className={`text-[#cdd6f4] ${
                                 hasError ? "text-[#f38ba8]" : ""
-                              }`}
+                              } ${!row[header] ? "text-[#6c7086] italic" : ""}`}
                             >
-                              {row[header] || "-"}
+                              {row[header] || "—"}
                             </span>
                             {hasError && (
-                              <div className="relative group">
-                                <AlertTriangle className="h-4 w-4 text-[#f38ba8]" />
-                                {/* Tooltip */}
-                                <div className="absolute bottom-full left-0 mb-2 w-64 p-2 bg-[#1e1e2e] border border-[#f38ba8] rounded text-xs text-[#cdd6f4] opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                  <div className="font-medium text-[#f38ba8] mb-1">
-                                    {cellError.rule}:{" "}
-                                    {cellError.severity.toUpperCase()}
-                                  </div>
-                                  <div className="mb-2">
-                                    {cellError.message}
-                                  </div>
-                                  {cellError.suggestion && (
-                                    <div className="text-[#a6e3a1]">
-                                      💡 {cellError.suggestion}
+                              <div className="relative">
+                                <AlertTriangle
+                                  className="h-4 w-4 text-[#f38ba8] cursor-help"
+                                  onMouseEnter={() => setHoveredError(cellId)}
+                                  onMouseLeave={() => setHoveredError(null)}
+                                />
+                                {/* Tooltip positioned above the cell */}
+                                {hoveredError === cellId && (
+                                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-72 p-3 bg-[#1e1e2e] border border-[#f38ba8] rounded-lg text-xs text-[#cdd6f4] z-50 shadow-lg">
+                                    <div className="font-medium text-[#f38ba8] mb-2">
+                                      {cellError.rule}:{" "}
+                                      {cellError.severity.toUpperCase()}
                                     </div>
-                                  )}
-                                </div>
+                                    <div className="mb-2 text-[#cdd6f4]">
+                                      {cellError.message}
+                                    </div>
+                                    {cellError.suggestion && (
+                                      <div className="text-[#a6e3a1] border-t border-[#45475a] pt-2">
+                                        💡 {cellError.suggestion}
+                                      </div>
+                                    )}
+                                    {/* Arrow pointing down */}
+                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[#f38ba8]"></div>
+                                  </div>
+                                )}
                               </div>
                             )}
-                          </>
-                        )}
-                        <Edit3
-                          className="h-3 w-3 text-[#6c7086] opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
-                          onClick={() =>
-                            setEditingCell({
-                              row: rowIndex,
-                              col: header,
-                              table: tableKey,
-                            })
-                          }
-                        />
-                      </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              handleCellEdit(
+                                tableKey,
+                                rowIndex,
+                                header,
+                                row[header]
+                              )
+                            }
+                            className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 text-[#6c7086] hover:text-[#cdd6f4] hover:bg-[#45475a] transition-all duration-200"
+                          >
+                            <Edit3 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
                     </td>
                   );
                 })}
@@ -165,17 +262,6 @@ export default function DataGrid({
         </table>
       </div>
     );
-  };
-
-  const isFieldInvalid = (value: any, fieldName: string): boolean => {
-    // Basic validation logic - you can expand this
-    if (fieldName.toLowerCase().includes("email")) {
-      return !value || !value.includes("@");
-    }
-    if (fieldName.toLowerCase().includes("phone")) {
-      return !value;
-    }
-    return false;
   };
 
   if (availableTables.length === 0) {
@@ -193,7 +279,30 @@ export default function DataGrid({
   return (
     <Card className="bg-[#313244] border-[#45475a]">
       <CardHeader>
-        <CardTitle className="text-[#cdd6f4]">Data Preview & Editing</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-[#cdd6f4] flex items-center">
+            Data Preview & Editing
+            <Badge
+              variant="outline"
+              className="ml-3 bg-[#cba6f7]/20 text-[#cba6f7] border-[#cba6f7]/30"
+            >
+              Click any cell to edit
+            </Badge>
+          </CardTitle>
+          {editingCell && (
+            <div className="flex items-center space-x-2 text-sm text-[#6c7086]">
+              <span>
+                Editing: {editingCell.table}.{editingCell.col}
+              </span>
+              <Badge
+                variant="outline"
+                className="bg-[#f9e2af]/20 text-[#f9e2af] border-[#f9e2af]/30"
+              >
+                Press Enter to save, Esc to cancel
+              </Badge>
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue={availableTables[0]} className="w-full">

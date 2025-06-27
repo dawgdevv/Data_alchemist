@@ -57,7 +57,6 @@ export function useSession() {
       });
 
       const result = await response.json();
-      //console.log("Full API Response:", result); // Debug log
 
       if (result.success) {
         setSessionData(result.sessionData);
@@ -68,6 +67,51 @@ export function useSession() {
       }
     } catch (error) {
       console.error("Upload failed:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateSessionData = async (
+    fileType: string,
+    newData: ParsedFileData
+  ) => {
+    try {
+      setIsLoading(true);
+
+      // Update local state immediately for better UX
+      setSessionData((prev) => ({
+        ...prev,
+        [fileType]: newData,
+      }));
+
+      // Send update to backend
+      const response = await fetch("/api/update-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sessionId,
+          fileType,
+          data: newData,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update with the validated data from backend
+        setSessionData(result.sessionData);
+        return result;
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      console.error("Update failed:", error);
+      // Revert local state on error
+      loadSessionData(sessionId);
       throw error;
     } finally {
       setIsLoading(false);
@@ -87,6 +131,7 @@ export function useSession() {
     sessionData,
     isLoading,
     uploadFile,
+    updateSessionData,
     clearSession,
     loadSessionData: () => loadSessionData(sessionId),
   };

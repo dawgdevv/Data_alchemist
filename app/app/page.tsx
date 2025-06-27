@@ -56,20 +56,41 @@ export default function DataAlchemist() {
     }
   };
 
+  const handleDataChange = async (file: string, data: any[]) => {
+    // Re-run validation after data changes
+    try {
+      const response = await fetch("/api/validate-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sessionId:
+            sessionData.sessionId ||
+            localStorage.getItem("data-alchemist-session"),
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success && result.validation) {
+        setValidationErrors(result.validation.errorCounts);
+        setValidationDetails(result.validation.errors);
+      }
+    } catch (error) {
+      console.error("Failed to re-validate data:", error);
+    }
+  };
+
   const handleErrorClick = (file: string, error: string) => {
-    // Find the error in validationDetails and focus on the cell
     const errorDetail = validationDetails.find(
       (err) => err.file === file && err.message === error
     );
 
     if (errorDetail && errorDetail.row !== undefined) {
-      // Switch to data tab and highlight the error
       setActiveTab("data");
-      // You can add logic here to scroll to and highlight the specific cell
     }
   };
 
-  // Create a mock uploadedFiles object for the ExportPanel
   const uploadedFiles = {
     clients: sessionData.clients
       ? ({ name: sessionData.clients.fileName } as File)
@@ -223,6 +244,7 @@ export default function DataAlchemist() {
                 <DataGrid
                   validationErrors={validationErrors}
                   validationDetails={validationDetails}
+                  onDataChange={handleDataChange}
                 />
               </div>
             )}

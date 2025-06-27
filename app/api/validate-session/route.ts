@@ -1,12 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import * as XLSX from "xlsx";
-import Papa from "papaparse";
-import {
-  getSession,
-  setSession,
-  updateSessionFile,
-  hasSession,
-} from "@/lib/session-store";
+import { getSession } from "@/lib/session-store";
 
 interface ValidationError {
   id: string;
@@ -68,7 +61,7 @@ const REQUIRED_COLUMNS = {
   ],
 };
 
-// Validation Engine Class
+// Copy the entire ValidationEngine class from upload/route.ts
 class ValidationEngine {
   private errors: ValidationError[] = [];
   private sessionData: SessionData;
@@ -82,15 +75,15 @@ class ValidationEngine {
     this.errors = [];
 
     // Run all validation rules
-    this.validateRequiredColumns(); // V1
-    this.validateDuplicateIds(); // V2
-    this.validateMalformedLists(); // V3
-    this.validateOutOfRangeValues(); // V4
-    this.validateBrokenJSON(); // V5
-    this.validateUnknownReferences(); // V6
-    this.validateOverloadedWorkers(); // V9
-    this.validateSkillCoverage(); // V11
-    this.validateMaxConcurrencyFeasibility(); // V12
+    this.validateRequiredColumns();
+    this.validateDuplicateIds();
+    this.validateMalformedLists();
+    this.validateOutOfRangeValues();
+    this.validateBrokenJSON();
+    this.validateUnknownReferences();
+    this.validateOverloadedWorkers();
+    this.validateSkillCoverage();
+    this.validateMaxConcurrencyFeasibility();
 
     // Group errors by file
     const errorsByFile: { [file: string]: ValidationError[] } = {};
@@ -109,7 +102,6 @@ class ValidationEngine {
     };
   }
 
-  // V1: Missing required columns
   private validateRequiredColumns() {
     Object.entries(REQUIRED_COLUMNS).forEach(([fileType, requiredCols]) => {
       const fileData = this.sessionData[fileType];
@@ -132,7 +124,6 @@ class ValidationEngine {
     });
   }
 
-  // V2: Duplicate IDs
   private validateDuplicateIds() {
     const idColumns = {
       clients: "ClientID",
@@ -175,7 +166,6 @@ class ValidationEngine {
     });
   }
 
-  // V3: Malformed lists
   private validateMalformedLists() {
     const listColumns = {
       workers: ["AvailableSlots"],
@@ -194,13 +184,11 @@ class ValidationEngine {
           if (!value) return;
 
           try {
-            // Try to parse as JSON array
             if (typeof value === "string") {
               const parsed = JSON.parse(value);
               if (!Array.isArray(parsed)) {
                 throw new Error("Not an array");
               }
-              // Validate array elements are numbers for these columns
               if (
                 !parsed.every(
                   (item) => typeof item === "number" && !isNaN(item)
@@ -227,9 +215,7 @@ class ValidationEngine {
     });
   }
 
-  // V4: Out-of-range values
   private validateOutOfRangeValues() {
-    // Priority Level validation (1-5)
     const clientsData = this.sessionData.clients;
     if (clientsData && clientsData.headers.includes("PriorityLevel")) {
       clientsData.data.forEach((row, index) => {
@@ -250,7 +236,6 @@ class ValidationEngine {
       });
     }
 
-    // Duration validation (≥ 1)
     const tasksData = this.sessionData.tasks;
     if (tasksData && tasksData.headers.includes("Duration")) {
       tasksData.data.forEach((row, index) => {
@@ -272,7 +257,6 @@ class ValidationEngine {
     }
   }
 
-  // V5: Broken JSON
   private validateBrokenJSON() {
     const clientsData = this.sessionData.clients;
     if (clientsData && clientsData.headers.includes("AttributesJSON")) {
@@ -299,14 +283,12 @@ class ValidationEngine {
     }
   }
 
-  // V6: Unknown references
   private validateUnknownReferences() {
     const clientsData = this.sessionData.clients;
     const tasksData = this.sessionData.tasks;
 
     if (!clientsData || !tasksData) return;
 
-    // Get all available TaskIDs
     const availableTaskIds = new Set(
       tasksData.data.map((row) => row.TaskID).filter((id) => id)
     );
@@ -316,7 +298,6 @@ class ValidationEngine {
         const requestedIds = row.RequestedTaskIDs;
         if (!requestedIds) return;
 
-        // Parse comma-separated TaskIDs
         const taskIds = requestedIds
           .split(",")
           .map((id: string) => id.trim())
@@ -341,7 +322,6 @@ class ValidationEngine {
     }
   }
 
-  // V9: Overloaded workers
   private validateOverloadedWorkers() {
     const workersData = this.sessionData.workers;
     if (!workersData) return;
@@ -376,14 +356,12 @@ class ValidationEngine {
     });
   }
 
-  // V11: Skill coverage matrix
   private validateSkillCoverage() {
     const workersData = this.sessionData.workers;
     const tasksData = this.sessionData.tasks;
 
     if (!workersData || !tasksData) return;
 
-    // Get all worker skills
     const allWorkerSkills = new Set<string>();
     workersData.data.forEach((row) => {
       if (row.Skills) {
@@ -394,7 +372,6 @@ class ValidationEngine {
       }
     });
 
-    // Check each task's required skills
     tasksData.data.forEach((row, index) => {
       if (!row.RequiredSkills) return;
 
@@ -420,7 +397,6 @@ class ValidationEngine {
     });
   }
 
-  // V12: Max concurrency feasibility
   private validateMaxConcurrencyFeasibility() {
     const workersData = this.sessionData.workers;
     const tasksData = this.sessionData.tasks;
@@ -435,7 +411,6 @@ class ValidationEngine {
         ? task.RequiredSkills.split(",").map((skill: string) => skill.trim())
         : [];
 
-      // Count workers who have ALL required skills
       let qualifiedWorkerCount = 0;
       workersData.data.forEach((worker) => {
         if (!worker.Skills) return;
@@ -473,119 +448,32 @@ class ValidationEngine {
   }
 }
 
-function validateSessionData(sessionData: SessionData): ValidationResult {
-  const engine = new ValidationEngine(sessionData);
-  return engine.validate();
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
-    const file = formData.get("file") as File;
-    const fileType = formData.get("fileType") as string;
-    const sessionId = formData.get("sessionId") as string;
+    const { sessionId } = await request.json();
 
-    if (!file || !fileType || !sessionId) {
+    if (!sessionId) {
       return NextResponse.json(
-        { error: "File, fileType, and sessionId are required" },
+        { error: "SessionId is required" },
         { status: 400 }
       );
     }
 
-    // Parse file based on extension
-    const buffer = await file.arrayBuffer();
-    let parsedData: ParsedFileData;
-
-    if (file.name.endsWith(".csv")) {
-      parsedData = await parseCSV(buffer, file.name);
-    } else if (file.name.endsWith(".xlsx")) {
-      parsedData = await parseXLSX(buffer, file.name);
-    } else {
-      return NextResponse.json(
-        { error: "Unsupported file format" },
-        { status: 400 }
-      );
-    }
-
-    // Store in session using shared store
-    const sessionData = updateSessionFile(sessionId, fileType, parsedData);
+    const sessionData = getSession(sessionId);
 
     // Run validation
-    const validationResult = validateSessionData(sessionData);
+    const validationEngine = new ValidationEngine(sessionData);
+    const validationResult = validationEngine.validate();
 
     return NextResponse.json({
       success: true,
-      data: parsedData,
-      sessionData: sessionData,
       validation: validationResult,
     });
   } catch (error) {
-    console.error("Upload error:", error);
+    console.error("Validation session error:", error);
     return NextResponse.json(
-      { error: "Failed to process file" },
+      { error: "Failed to validate session data" },
       { status: 500 }
     );
   }
-}
-
-async function parseCSV(
-  buffer: ArrayBuffer,
-  fileName: string
-): Promise<ParsedFileData> {
-  const text = new TextDecoder().decode(buffer);
-
-  return new Promise((resolve, reject) => {
-    Papa.parse(text, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        resolve({
-          headers: results.meta.fields || [],
-          data: results.data as Record<string, any>[],
-          fileName,
-          fileType: "csv",
-        });
-      },
-      error: (error) => reject(error),
-    });
-  });
-}
-
-async function parseXLSX(
-  buffer: ArrayBuffer,
-  fileName: string
-): Promise<ParsedFileData> {
-  const workbook = XLSX.read(buffer, { type: "array" });
-  const sheetName = workbook.SheetNames[0];
-  const worksheet = workbook.Sheets[sheetName];
-
-  const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-  const headers = jsonData[0] as string[];
-  const data = jsonData.slice(1).map((row: any[]) => {
-    const obj: Record<string, any> = {};
-    headers.forEach((header, index) => {
-      obj[header] = row[index] || "";
-    });
-    return obj;
-  });
-
-  return {
-    headers,
-    data,
-    fileName,
-    fileType: "xlsx",
-  };
-}
-
-// Get session data
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const sessionId = searchParams.get("sessionId");
-
-  if (!sessionId) {
-    return NextResponse.json({ error: "SessionId required" }, { status: 400 });
-  }
-
-  const sessionData = getSession(sessionId);
-  return NextResponse.json({ sessionData });
 }
