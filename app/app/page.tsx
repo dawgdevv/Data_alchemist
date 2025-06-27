@@ -14,6 +14,18 @@ import AIAssistant from "@/components/ai-assistant";
 import { useSession } from "@/hooks/use-session";
 import Link from "next/link";
 
+interface ValidationError {
+  id: string;
+  rule: string;
+  severity: "error" | "warning" | "info";
+  message: string;
+  file: string;
+  row?: number;
+  column?: string;
+  value?: any;
+  suggestion?: string;
+}
+
 export default function DataAlchemist() {
   const { sessionData, clearSession } = useSession();
   const [activeTab, setActiveTab] = useState("upload");
@@ -22,6 +34,9 @@ export default function DataAlchemist() {
     workers: 0,
     tasks: 0,
   });
+  const [validationDetails, setValidationDetails] = useState<ValidationError[]>(
+    []
+  );
   const [rules, setRules] = useState<any[]>([]);
 
   const totalErrors = Object.values(validationErrors).reduce(
@@ -30,34 +45,28 @@ export default function DataAlchemist() {
   );
   const uploadedCount = Object.keys(sessionData).length;
 
-  const handleFileUploaded = (fileType: string, data: any) => {
+  const handleFileUploaded = (fileType: string, data: any, validation: any) => {
     // Switch to data tab after successful upload
     setActiveTab("data");
 
-    // Run basic validation
-    const errorCount = runBasicValidation(data.data, data.headers);
-    setValidationErrors((prev) => ({
-      ...prev,
-      [fileType]: errorCount,
-    }));
+    // Update validation state
+    if (validation) {
+      setValidationErrors(validation.errorCounts);
+      setValidationDetails(validation.errors);
+    }
   };
 
-  const runBasicValidation = (data: any[], headers: string[]): number => {
-    let errors = 0;
-    data.forEach((row) => {
-      headers.forEach((header) => {
-        if (
-          header.toLowerCase().includes("email") &&
-          (!row[header] || !row[header].includes("@"))
-        ) {
-          errors++;
-        }
-        if (header.toLowerCase().includes("phone") && !row[header]) {
-          errors++;
-        }
-      });
-    });
-    return errors;
+  const handleErrorClick = (file: string, error: string) => {
+    // Find the error in validationDetails and focus on the cell
+    const errorDetail = validationDetails.find(
+      (err) => err.file === file && err.message === error
+    );
+
+    if (errorDetail && errorDetail.row !== undefined) {
+      // Switch to data tab and highlight the error
+      setActiveTab("data");
+      // You can add logic here to scroll to and highlight the specific cell
+    }
   };
 
   // Create a mock uploadedFiles object for the ExportPanel
@@ -107,13 +116,6 @@ export default function DataAlchemist() {
               className="bg-[#1e1e2e] text-[#cdd6f4] border-[#313244] hover:bg-[#313244]"
             >
               Clear Session
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-[#1e1e2e] text-[#cdd6f4] border-[#313244] hover:bg-[#313244]"
-            >
-              Save Project
             </Button>
           </div>
         </div>
@@ -200,9 +202,8 @@ export default function DataAlchemist() {
                 {totalErrors > 0 && (
                   <ValidationPanel
                     validationErrors={validationErrors}
-                    onErrorClick={(file, error) => {
-                      setActiveTab("data");
-                    }}
+                    validationDetails={validationDetails}
+                    onErrorClick={handleErrorClick}
                   />
                 )}
               </div>
@@ -219,7 +220,10 @@ export default function DataAlchemist() {
                     edit values.
                   </p>
                 </div>
-                <DataGrid validationErrors={validationErrors} />
+                <DataGrid
+                  validationErrors={validationErrors}
+                  validationDetails={validationDetails}
+                />
               </div>
             )}
 

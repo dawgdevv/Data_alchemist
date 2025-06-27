@@ -8,11 +8,27 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Edit3 } from "lucide-react";
 import { useSession } from "@/hooks/use-session";
 
-interface DataGridProps {
-  validationErrors?: { [key: string]: number };
+interface ValidationError {
+  id: string;
+  rule: string;
+  severity: "error" | "warning" | "info";
+  message: string;
+  file: string;
+  row?: number;
+  column?: string;
+  value?: any;
+  suggestion?: string;
 }
 
-export default function DataGrid({ validationErrors = {} }: DataGridProps) {
+interface DataGridProps {
+  validationErrors?: { [key: string]: number };
+  validationDetails?: ValidationError[];
+}
+
+export default function DataGrid({
+  validationErrors = {},
+  validationDetails = [],
+}: DataGridProps) {
   const { sessionData } = useSession();
   const [editingCell, setEditingCell] = useState<{
     row: number;
@@ -23,6 +39,19 @@ export default function DataGrid({ validationErrors = {} }: DataGridProps) {
   const availableTables = Object.keys(sessionData).filter(
     (key) => sessionData[key]
   );
+
+  const getCellValidationError = (
+    tableKey: string,
+    rowIndex: number,
+    column: string
+  ): ValidationError | undefined => {
+    return validationDetails.find(
+      (error) =>
+        error.file === tableKey &&
+        error.row === rowIndex &&
+        error.column === column
+    );
+  };
 
   const renderTable = (tableKey: string) => {
     const tableData = sessionData[tableKey];
@@ -57,45 +86,79 @@ export default function DataGrid({ validationErrors = {} }: DataGridProps) {
                 key={rowIndex}
                 className="border-b border-[#313244] hover:bg-[#45475a]/30"
               >
-                {headers.map((header) => (
-                  <td key={header} className="p-3 relative group">
-                    <div className="flex items-center space-x-2">
-                      {editingCell?.row === rowIndex &&
-                      editingCell?.col === header &&
-                      editingCell?.table === tableKey ? (
-                        <Input
-                          defaultValue={row[header] || ""}
-                          className="h-8 bg-[#1e1e2e] border-[#cba6f7] text-[#cdd6f4]"
-                          onBlur={() => setEditingCell(null)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") setEditingCell(null);
-                          }}
-                          autoFocus
+                {headers.map((header) => {
+                  const cellError = getCellValidationError(
+                    tableKey,
+                    rowIndex,
+                    header
+                  );
+                  const hasError = !!cellError;
+
+                  return (
+                    <td
+                      key={header}
+                      className={`p-3 relative group ${
+                        hasError ? "bg-[#f38ba8]/10" : ""
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        {editingCell?.row === rowIndex &&
+                        editingCell?.col === header &&
+                        editingCell?.table === tableKey ? (
+                          <Input
+                            defaultValue={row[header] || ""}
+                            className="h-8 bg-[#1e1e2e] border-[#cba6f7] text-[#cdd6f4]"
+                            onBlur={() => setEditingCell(null)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") setEditingCell(null);
+                            }}
+                            autoFocus
+                          />
+                        ) : (
+                          <>
+                            <span
+                              className={`text-[#cdd6f4] ${
+                                hasError ? "text-[#f38ba8]" : ""
+                              }`}
+                            >
+                              {row[header] || "-"}
+                            </span>
+                            {hasError && (
+                              <div className="relative group">
+                                <AlertTriangle className="h-4 w-4 text-[#f38ba8]" />
+                                {/* Tooltip */}
+                                <div className="absolute bottom-full left-0 mb-2 w-64 p-2 bg-[#1e1e2e] border border-[#f38ba8] rounded text-xs text-[#cdd6f4] opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                  <div className="font-medium text-[#f38ba8] mb-1">
+                                    {cellError.rule}:{" "}
+                                    {cellError.severity.toUpperCase()}
+                                  </div>
+                                  <div className="mb-2">
+                                    {cellError.message}
+                                  </div>
+                                  {cellError.suggestion && (
+                                    <div className="text-[#a6e3a1]">
+                                      💡 {cellError.suggestion}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                        <Edit3
+                          className="h-3 w-3 text-[#6c7086] opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+                          onClick={() =>
+                            setEditingCell({
+                              row: rowIndex,
+                              col: header,
+                              table: tableKey,
+                            })
+                          }
                         />
-                      ) : (
-                        <>
-                          <span className="text-[#cdd6f4]">
-                            {row[header] || "-"}
-                          </span>
-                          {/* Add validation indicators here */}
-                          {isFieldInvalid(row[header], header) && (
-                            <AlertTriangle className="h-4 w-4 text-[#f38ba8]" />
-                          )}
-                        </>
-                      )}
-                      <Edit3
-                        className="h-3 w-3 text-[#6c7086] opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
-                        onClick={() =>
-                          setEditingCell({
-                            row: rowIndex,
-                            col: header,
-                            table: tableKey,
-                          })
-                        }
-                      />
-                    </div>
-                  </td>
-                ))}
+                      </div>
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>

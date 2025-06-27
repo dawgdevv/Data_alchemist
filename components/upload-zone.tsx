@@ -14,7 +14,7 @@ import { useSession } from "@/hooks/use-session";
 import { useState } from "react";
 
 interface UploadZoneProps {
-  onFileUploaded?: (fileType: string, data: any) => void;
+  onFileUploaded?: (fileType: string, data: any, validation: any) => void;
 }
 
 export default function UploadZone({ onFileUploaded }: UploadZoneProps) {
@@ -47,12 +47,16 @@ export default function UploadZone({ onFileUploaded }: UploadZoneProps) {
 
   const handleFileUpload = async (file: File, fileType: string) => {
     try {
-      const data = await uploadFile(file, fileType);
+      const result = await uploadFile(file, fileType);
+      console.log("Upload result:", result); // Debug log
+
       setUploadedFiles((prev) => ({
         ...prev,
         [fileType]: file,
       }));
-      onFileUploaded?.(fileType, data);
+
+      // Pass both data and validation to parent
+      onFileUploaded?.(fileType, result, result.validation);
     } catch (error) {
       console.error("Failed to upload file:", error);
       // You might want to show an error toast here

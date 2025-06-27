@@ -57,9 +57,12 @@ export function useSession() {
       });
 
       const result = await response.json();
+      //console.log("Full API Response:", result); // Debug log
+
       if (result.success) {
         setSessionData(result.sessionData);
-        return result.data;
+        // Return the entire result including validation
+        return result;
       } else {
         throw new Error(result.error);
       }
