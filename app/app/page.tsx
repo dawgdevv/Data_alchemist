@@ -1,0 +1,269 @@
+"use client";
+
+import { useState } from "react";
+import { Upload, Database, Settings, Zap, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import UploadZone from "@/components/upload-zone";
+import DataGrid from "@/components/data-grid";
+import ValidationPanel from "@/components/validation-panel";
+import RuleBuilder from "@/components/rule-builder";
+import PrioritizationPanel from "@/components/prioritization-panel";
+import ExportPanel from "@/components/export-panel";
+import AIAssistant from "@/components/ai-assistant";
+import { useSession } from "@/hooks/use-session";
+import Link from "next/link";
+
+export default function DataAlchemist() {
+  const { sessionData, clearSession } = useSession();
+  const [activeTab, setActiveTab] = useState("upload");
+  const [validationErrors, setValidationErrors] = useState({
+    clients: 0,
+    workers: 0,
+    tasks: 0,
+  });
+  const [rules, setRules] = useState<any[]>([]);
+
+  const totalErrors = Object.values(validationErrors).reduce(
+    (sum, count) => sum + count,
+    0
+  );
+  const uploadedCount = Object.keys(sessionData).length;
+
+  const handleFileUploaded = (fileType: string, data: any) => {
+    // Switch to data tab after successful upload
+    setActiveTab("data");
+
+    // Run basic validation
+    const errorCount = runBasicValidation(data.data, data.headers);
+    setValidationErrors((prev) => ({
+      ...prev,
+      [fileType]: errorCount,
+    }));
+  };
+
+  const runBasicValidation = (data: any[], headers: string[]): number => {
+    let errors = 0;
+    data.forEach((row) => {
+      headers.forEach((header) => {
+        if (
+          header.toLowerCase().includes("email") &&
+          (!row[header] || !row[header].includes("@"))
+        ) {
+          errors++;
+        }
+        if (header.toLowerCase().includes("phone") && !row[header]) {
+          errors++;
+        }
+      });
+    });
+    return errors;
+  };
+
+  // Create a mock uploadedFiles object for the ExportPanel
+  const uploadedFiles = {
+    clients: sessionData.clients
+      ? ({ name: sessionData.clients.fileName } as File)
+      : null,
+    workers: sessionData.workers
+      ? ({ name: sessionData.workers.fileName } as File)
+      : null,
+    tasks: sessionData.tasks
+      ? ({ name: sessionData.tasks.fileName } as File)
+      : null,
+  };
+
+  return (
+    <div className="min-h-screen bg-[#1e1e2e] text-[#cdd6f4] font-mono">
+      {/* Header */}
+      <header className="border-b border-[#313244] bg-[#181825] px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="h-8 w-8 bg-gradient-to-br from-[#cba6f7] to-[#f38ba8] rounded-lg flex items-center justify-center">
+              <Zap className="h-4 w-4 text-[#1e1e2e]" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-[#cdd6f4]">
+                Data Alchemist
+              </h1>
+              <p className="text-xs text-[#6c7086]">
+                Transform your data with AI precision
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            {totalErrors > 0 && (
+              <Badge
+                variant="destructive"
+                className="bg-[#f38ba8] text-[#1e1e2e]"
+              >
+                {totalErrors} errors
+              </Badge>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearSession}
+              className="bg-[#1e1e2e] text-[#cdd6f4] border-[#313244] hover:bg-[#313244]"
+            >
+              Clear Session
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-[#1e1e2e] text-[#cdd6f4] border-[#313244] hover:bg-[#313244]"
+            >
+              Save Project
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex h-[calc(100vh-73px)]">
+        {/* Sidebar */}
+        <aside className="w-64 border-r border-[#313244] bg-[#181825] p-4">
+          <nav className="space-y-2">
+            <Button
+              variant={activeTab === "upload" ? "default" : "ghost"}
+              className={`w-full justify-start ${
+                activeTab === "upload"
+                  ? "bg-[#cba6f7] text-[#1e1e2e] hover:bg-[#cba6f7]/90"
+                  : "text-[#cdd6f4] hover:bg-[#313244]"
+              }`}
+              onClick={() => setActiveTab("upload")}
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Upload Data
+            </Button>
+            <Button
+              variant={activeTab === "data" ? "default" : "ghost"}
+              className={`w-full justify-start ${
+                activeTab === "data"
+                  ? "bg-[#cba6f7] text-[#1e1e2e] hover:bg-[#cba6f7]/90"
+                  : "text-[#cdd6f4] hover:bg-[#313244]"
+              }`}
+              onClick={() => setActiveTab("data")}
+            >
+              <Database className="mr-2 h-4 w-4" />
+              Data Grid
+              {uploadedCount > 0 && (
+                <Badge
+                  variant="outline"
+                  className="ml-auto bg-[#a6e3a1]/20 text-[#a6e3a1] border-[#a6e3a1]/30"
+                >
+                  {uploadedCount}
+                </Badge>
+              )}
+            </Button>
+            <Button
+              variant={activeTab === "rules" ? "default" : "ghost"}
+              className={`w-full justify-start ${
+                activeTab === "rules"
+                  ? "bg-[#cba6f7] text-[#1e1e2e] hover:bg-[#cba6f7]/90"
+                  : "text-[#cdd6f4] hover:bg-[#313244]"
+              }`}
+              onClick={() => setActiveTab("rules")}
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              Rule Builder
+            </Button>
+            <Button
+              variant={activeTab === "export" ? "default" : "ghost"}
+              className={`w-full justify-start ${
+                activeTab === "export"
+                  ? "bg-[#cba6f7] text-[#1e1e2e] hover:bg-[#cba6f7]/90"
+                  : "text-[#cdd6f4] hover:bg-[#313244]"
+              }`}
+              onClick={() => setActiveTab("export")}
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+          </nav>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto">
+          <div className="flex-1 overflow-auto p-6">
+            {activeTab === "upload" && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-[#f38ba8] mb-2">
+                    Upload Your Data Files
+                  </h2>
+                  <p className="text-[#6c7086] mb-6">
+                    Upload your CSV or XLSX files to begin data cleaning and
+                    validation.
+                  </p>
+                </div>
+                <UploadZone onFileUploaded={handleFileUploaded} />
+                {totalErrors > 0 && (
+                  <ValidationPanel
+                    validationErrors={validationErrors}
+                    onErrorClick={(file, error) => {
+                      setActiveTab("data");
+                    }}
+                  />
+                )}
+              </div>
+            )}
+
+            {activeTab === "data" && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-[#a6e3a1] mb-2">
+                    Data Grid
+                  </h2>
+                  <p className="text-[#6c7086] mb-6">
+                    Review and edit your uploaded data. Click on any cell to
+                    edit values.
+                  </p>
+                </div>
+                <DataGrid validationErrors={validationErrors} />
+              </div>
+            )}
+
+            {activeTab === "rules" && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-[#f38ba8] mb-2">
+                    Rule Builder
+                  </h2>
+                  <p className="text-[#6c7086] mb-6">
+                    Define custom rules and priorities for your data processing.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  <RuleBuilder rules={rules} setRules={setRules} />
+                  <PrioritizationPanel />
+                </div>
+              </div>
+            )}
+
+            {activeTab === "export" && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-[#f38ba8] mb-2">
+                    Export Data
+                  </h2>
+                  <p className="text-[#6c7086] mb-6">
+                    Download your cleaned data and configuration files.
+                  </p>
+                </div>
+                <ExportPanel
+                  hasErrors={totalErrors > 0}
+                  errorCount={totalErrors}
+                  uploadedFiles={uploadedFiles}
+                  rules={rules}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* AI Assistant Panel */}
+          <AIAssistant />
+        </main>
+      </div>
+    </div>
+  );
+}
