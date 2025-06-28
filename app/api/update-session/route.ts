@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession, updateSessionFile } from "@/lib/session-store";
+import {
+  getSession,
+  updateSessionFile,
+  debugSession,
+  setSession,
+} from "@/lib/session-store";
 
 interface ValidationError {
   id: string;
@@ -449,12 +454,9 @@ class ValidationEngine {
   }
 }
 
-// In-memory session storage (same as upload)
-// const sessions = new Map<string, SessionData>();
-
 export async function POST(request: NextRequest) {
   try {
-    const { sessionId, fileType, data } = await request.json();
+    const { sessionId, fileType, data, allSessionData } = await request.json();
 
     if (!sessionId || !fileType || !data) {
       return NextResponse.json(
@@ -463,22 +465,110 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update session data using shared store
+    console.log(`=== UPDATE SESSION START ===`);
+    console.log(`Session: ${sessionId}, File: ${fileType}`);
+
+    // Debug: Check session state before update
+    debugSession(sessionId);
+
+    // Get current session state before update
+    const beforeUpdate = getSession(sessionId);
+    console.log(
+      `Before update - Backend session files:`,
+      Object.keys(beforeUpdate)
+    );
+
+    // If frontend sent allSessionData as backup, use it to restore missing files
+    if (
+      allSessionData &&
+      Object.keys(beforeUpdate).length < Object.keys(allSessionData).length
+    ) {
+      console.log(
+        `Frontend has more files than backend, restoring from frontend data`
+      );
+      console.log(`Frontend files:`, Object.keys(allSessionData));
+      console.log(`Backend files:`, Object.keys(beforeUpdate));
+
+      // Restore missing files from frontend
+      const missingFiles = Object.keys(allSessionData).filter(
+        (file) => !beforeUpdate[file] && file !== fileType
+      );
+
+      if (missingFiles.length > 0) {
+        console.log(`Restoring missing files:`, missingFiles);
+        // Set the complete session data
+        setSession(sessionId, allSessionData);
+      }
+    }
+
+    // Now update the specific file
     const sessionData = updateSessionFile(sessionId, fileType, data);
 
+    // Debug: Check session state after update
+    console.log(
+      `After update - Backend session files:`,
+      Object.keys(sessionData)
+    );
+    debugSession(sessionId);
+
+    // Final verification - ensure we have all expected files
+    const expectedFiles = ["clients", "workers", "tasks"];
+    const presentFiles = Object.keys(sessionData);
+    const missingFiles = expectedFiles.filter((file) => !sessionData[file]);
+
+    if (missingFiles.length > 0 && allSessionData) {
+      console.warn(
+        `Some expected files missing, attempting recovery:`,
+        missingFiles
+      );
+      // Try to recover from allSessionData
+      const recoveredData = { ...sessionData };
+      missingFiles.forEach((file) => {
+        if (allSessionData[file]) {
+          recoveredData[file] = allSessionData[file];
+          console.log(`Recovered file: ${file}`);
+        }
+      });
+
+      if (Object.keys(recoveredData).length > Object.keys(sessionData).length) {
+        setSession(sessionId, recoveredData);
+        console.log(
+          `Recovery successful, final files:`,
+          Object.keys(recoveredData)
+        );
+      }
+    }
+
+    // Get final session data
+    const finalSessionData = getSession(sessionId);
+    console.log(`Final session data files:`, Object.keys(finalSessionData));
+
     // Run validation on updated data
-    const validationEngine = new ValidationEngine(sessionData);
+    const validationEngine = new ValidationEngine(finalSessionData);
     const validationResult = validationEngine.validate();
+
+    console.log(`=== UPDATE SESSION END ===`);
 
     return NextResponse.json({
       success: true,
-      sessionData: sessionData,
+      sessionData: finalSessionData,
       validation: validationResult,
+      debug: {
+        updatedFile: fileType,
+        totalFiles: Object.keys(finalSessionData).length,
+        files: Object.keys(finalSessionData),
+        beforeUpdateFiles: Object.keys(beforeUpdate),
+        afterUpdateFiles: Object.keys(finalSessionData),
+        hadFrontendBackup: !!allSessionData,
+      },
     });
   } catch (error) {
     console.error("Update session error:", error);
     return NextResponse.json(
-      { error: "Failed to update session data" },
+      {
+        error: "Failed to update session data",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }

@@ -448,6 +448,7 @@ class ValidationEngine {
   }
 }
 
+// Add better error handling and session verification
 export async function POST(request: NextRequest) {
   try {
     const { sessionId } = await request.json();
@@ -459,11 +460,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log(`Validating session: ${sessionId}`);
+
     const sessionData = getSession(sessionId);
+
+    // Debug: Log session state before validation
+    console.log(`Session data keys:`, Object.keys(sessionData));
+    console.log(`Session data file count:`, Object.keys(sessionData).length);
+
+    // Check if session has any data
+    if (Object.keys(sessionData).length === 0) {
+      console.warn(`No session data found for session: ${sessionId}`);
+      return NextResponse.json({
+        success: true,
+        validation: {
+          errors: [],
+          errorsByFile: { clients: [], workers: [], tasks: [] },
+          errorCounts: { clients: 0, workers: 0, tasks: 0 },
+          isValid: true,
+        },
+      });
+    }
 
     // Run validation
     const validationEngine = new ValidationEngine(sessionData);
     const validationResult = validationEngine.validate();
+
+    console.log(
+      `Validation complete. Errors found:`,
+      validationResult.errors.length
+    );
 
     return NextResponse.json({
       success: true,

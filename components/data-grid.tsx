@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Edit3, Check, X, Save } from "lucide-react";
+import { AlertTriangle, Edit3, Check, X } from "lucide-react";
 import { useSession } from "@/hooks/use-session";
 
 interface ValidationError {
@@ -24,7 +24,7 @@ interface ValidationError {
 interface DataGridProps {
   validationErrors?: { [key: string]: number };
   validationDetails?: ValidationError[];
-  onDataChange?: (file: string, data: any[]) => void;
+  onDataChange?: (file: string, data: any[], validation: any) => void;
 }
 
 export default function DataGrid({
@@ -32,7 +32,7 @@ export default function DataGrid({
   validationDetails = [],
   onDataChange,
 }: DataGridProps) {
-  const { sessionData, updateSessionData } = useSession();
+  const { sessionData, updateSessionCell, lastValidationResult } = useSession();
   const [editingCell, setEditingCell] = useState<{
     row: number;
     col: string;
@@ -40,6 +40,7 @@ export default function DataGrid({
   } | null>(null);
   const [editValue, setEditValue] = useState("");
   const [hoveredError, setHoveredError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const editInputRef = useRef<HTMLInputElement>(null);
 
   const availableTables = Object.keys(sessionData).filter(
@@ -52,12 +53,18 @@ export default function DataGrid({
     }
   }, [editingCell]);
 
+  // Use validation data from props or fallback to last result
+  const currentValidationDetails =
+    validationDetails.length > 0
+      ? validationDetails
+      : lastValidationResult?.errors || [];
+
   const getCellValidationError = (
     tableKey: string,
     rowIndex: number,
     column: string
   ): ValidationError | undefined => {
-    return validationDetails.find(
+    return currentValidationDetails.find(
       (error) =>
         error.file === tableKey &&
         error.row === rowIndex &&
@@ -76,31 +83,42 @@ export default function DataGrid({
   };
 
   const handleSaveEdit = async () => {
-    if (!editingCell) return;
+    if (!editingCell || isSaving) return;
 
     const { row, col, table } = editingCell;
-    const tableData = sessionData[table];
 
-    if (!tableData) return;
+    try {
+      setIsSaving(true);
 
-    // Update the data
-    const updatedData = [...tableData.data];
-    updatedData[row] = {
-      ...updatedData[row],
-      [col]: editValue,
-    };
+      console.log(`Saving edit: ${table}.${col}[${row}] = "${editValue}"`);
 
-    // Update session data
-    await updateSessionData(table, {
-      ...tableData,
-      data: updatedData,
-    });
+      // Use the cell update method - validation is handled automatically
+      const result = await updateSessionCell(table, row, col, editValue);
 
-    // Notify parent component
-    onDataChange?.(table, updatedData);
+      console.log("Cell update result:", result);
 
-    setEditingCell(null);
-    setEditValue("");
+      // Notify parent component with validation result
+      if (onDataChange) {
+        const tableData = sessionData[table];
+        if (tableData && result?.validation) {
+          console.log(
+            "Notifying parent of data change with validation:",
+            result.validation
+          );
+          onDataChange(table, tableData.data, result.validation);
+        }
+      }
+
+      setEditingCell(null);
+      setEditValue("");
+
+      console.log("Cell save completed successfully");
+    } catch (error) {
+      console.error("Failed to save cell edit:", error);
+      // You might want to show an error toast here
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancelEdit = () => {
@@ -180,18 +198,25 @@ export default function DataGrid({
                             onKeyDown={handleKeyDown}
                             className="h-8 bg-[#1e1e2e] border-[#cba6f7] text-[#cdd6f4] text-sm"
                             placeholder="Enter value..."
+                            disabled={isSaving}
                           />
                           <Button
                             size="sm"
                             onClick={handleSaveEdit}
+                            disabled={isSaving}
                             className="h-8 w-8 p-0 bg-[#a6e3a1] text-[#1e1e2e] hover:bg-[#a6e3a1]/90"
                           >
-                            <Check className="h-3 w-3" />
+                            {isSaving ? (
+                              <div className="w-3 h-3 border border-[#1e1e2e] border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Check className="h-3 w-3" />
+                            )}
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={handleCancelEdit}
+                            disabled={isSaving}
                             className="h-8 w-8 p-0 bg-[#f38ba8] text-[#1e1e2e] hover:bg-[#f38ba8]/90 border-[#f38ba8]"
                           >
                             <X className="h-3 w-3" />
@@ -214,7 +239,6 @@ export default function DataGrid({
                                   onMouseEnter={() => setHoveredError(cellId)}
                                   onMouseLeave={() => setHoveredError(null)}
                                 />
-                                {/* Tooltip positioned above the cell */}
                                 {hoveredError === cellId && (
                                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-72 p-3 bg-[#1e1e2e] border border-[#f38ba8] rounded-lg text-xs text-[#cdd6f4] z-50 shadow-lg">
                                     <div className="font-medium text-[#f38ba8] mb-2">
@@ -229,7 +253,6 @@ export default function DataGrid({
                                         💡 {cellError.suggestion}
                                       </div>
                                     )}
-                                    {/* Arrow pointing down */}
                                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[#f38ba8]"></div>
                                   </div>
                                 )}
@@ -289,19 +312,21 @@ export default function DataGrid({
               Click any cell to edit
             </Badge>
           </CardTitle>
-          {editingCell && (
-            <div className="flex items-center space-x-2 text-sm text-[#6c7086]">
-              <span>
-                Editing: {editingCell.table}.{editingCell.col}
-              </span>
-              <Badge
-                variant="outline"
-                className="bg-[#f9e2af]/20 text-[#f9e2af] border-[#f9e2af]/30"
-              >
-                Press Enter to save, Esc to cancel
-              </Badge>
-            </div>
-          )}
+          <div className="flex items-center space-x-2">
+            {editingCell && (
+              <div className="flex items-center space-x-2 text-sm text-[#6c7086]">
+                <span>
+                  Editing: {editingCell.table}.{editingCell.col}
+                </span>
+                <Badge
+                  variant="outline"
+                  className="bg-[#f9e2af]/20 text-[#f9e2af] border-[#f9e2af]/30"
+                >
+                  Press Enter to save, Esc to cancel
+                </Badge>
+              </div>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>

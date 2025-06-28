@@ -1,41 +1,41 @@
 WorkerID,WorkerName,Skills,AvailableSlots,MaxLoadPerPhase,WorkerGroup,QualificationLevel
-1,John Smith,"Java,Python","[1,2,3]",5,A,5
-2,Jane Doe,"SQL,BI","[4,5]",4,B,4
-3,Peter Jones,"Java,C++","1-3",6,A,5
-4,Mary Brown,,"[2,4]",5,C,3
-5,David Wilson,"Python,R",-1,"[1,5]",3,B,4
-6,Susan Taylor,"SQL,Tableau","[3,4,5]",4,C,4
-7,Michael Miller,"Java","[1,2]",6,"Expert",A
-8,Karen Davis,"Python",,5,B,3
-9,James White,"C++,SQL","[2,3,4]",5,A,5
-10,Patricia Green,"BI,R","[1,4,5]",3,,2
-11,Robert Hall,"Java,SQL","[1,3,5]",5,A,5
-12,Linda Harris,"Python,Tableau","[2,4]",4,B,4
-13,Joseph Clark,"C++,BI","1-4",6,A,5
-14,Barbara Lewis,"R,SQL",,"[1,5]",5,C,3
-15,Thomas Walker,"Java",-1,"[2,3,4]",4,B,4
-16,Nancy Allen,"Python,C++","[1,3]",6,A,5
-17,Daniel Young,"SQL,BI","[4,5]",3,"Specialist",C
-18,Betty King,"Java,R",,5,B,3
-19,Paul Wright,"C++,Python","[1,2,5]",5,A,5
-20,Sandra Hill,"Tableau,SQL","[3,4]",4,,2
-21,Mark Scott,"Java,Python","[1,4,5]",5,A,5
-22,Ashley Adams,"SQL,R","[2,3]",4,B,4
-23,Steven Baker,"C++,Tableau","2-5",6,A,5
-24,Kimberly Carter,"Python,BI",,"[1,3]",5,C,3
-25,Andrew Mitchell,"Java",-1,"[2,4,5]",4,B,4
-26,Melissa Perez,"C++,SQL","[1,2]",6,A,5
-27,Joshua Roberts,"Python,R","[3,5]",3,"Lead",C
-28,Emily Turner,"Java,Tableau",,5,B,3
-29,Brian Phillips,"C++,BI","[1,3,4]",5,A,5
-30,Rebecca Campbell,"SQL,Python","[2,5]",4,,2
-31,Brandon Parker,"Java,R","[1,3,5]",5,A,5
-32,Lauren Evans,"Python,C++","[2,4]",4,B,4
-33,Justin Edwards,"SQL,Tableau","3-5",6,A,5
-34,Heather Collins,"BI,R",,"[1,2]",5,C,3
-35,Ryan Stewart,"Java",-1,"[3,4,5]",4,B,4
-36,Rachel Morris,"Python,SQL","[1,5]",6,A,5
-37,Gary Rogers,"C++,BI","[2,3]",3,"Senior",C
-38,Nicole Reed,"Java,Python",,5,B,3
-39,Jacob Cook,"SQL,R","[1,4]",5,A,5
-40,Brittany Morgan,"Tableau,C++","[2,5]",4,,2
+W1,Alice Johnson,"Python,JavaScript,SQL","[1,2,3,4,5]",3,TechTeam,Senior
+W2,Bob Smith,"Java,C++,Docker","[1,3,5,7]",2,TechTeam,Mid
+W3,Carol Davis,"React,TypeScript,CSS","[2,4,6]",4,Frontend,Senior
+W4,David Wilson,"Python,Machine Learning,AI","[1,2,3]",2,DataTeam,Expert
+W5,Emma Brown,"DevOps,AWS,Kubernetes","[3,4,5,6]",3,DevOps,Senior
+W6,Frank Miller,"PHP,MySQL,Laravel","[1,4,7]",2,BackEnd,Mid
+W7,Grace Lee,"UI/UX,Figma,Design","[2,5,6]",1,Design,Senior
+W8,Henry Taylor,"Python,Django,PostgreSQL","[1,2,4,5]",3,BackEnd,Senior
+W9,Ivy Chen,"JavaScript,Node.js,MongoDB","[3,6,7]",2,FullStack,Mid
+W8,Jack Robinson,"C#,.NET,Azure","[1,5,6]",2,TechTeam,Senior
+W11,Karen White,"Project Management,Agile,Scrum","[2,3,4]",5,Management,Expert
+W12,Leo Garcia,"Data Analysis,Excel,PowerBI","[1,4,6]",2,DataTeam,Mid
+W13,Mia Anderson,"Quality Assurance,Testing,Selenium","[2,5,7]",3,QA,Senior
+W14,Nick Thompson,"Security,Penetration Testing,CISSP","[3,4,6]",2,Security,Expert
+W15,Olivia Martinez,"Marketing,Content,SEO","[1,3,5]",6,Marketing,Mid
+W16,Paul Johnson,"Sales,CRM,Negotiation","malformed_array",2,Sales,Senior
+W17,Quinn Davis,"HR,Recruitment,Training","[1,6,7]",1,HR,Mid
+W18,Rachel Green,"Finance,Accounting,Budget","[3,5,6]",2,Finance,Senior
+W19,Sam Wilson,"Legal,Compliance,Contracts","[1,2,4]",1,Legal,Expert
+W20,Tina Brown,"Operations,Logistics,Supply Chain","[4,5,7]",3,Operations,Senior
+W21,Uma Patel,"Python,Data Science,Statistics","[1,3,4,6]",4,DataTeam,Expert
+W22,Victor Kim,"React,Vue,Angular","[2,3,5]",3,Frontend,Senior
+W23,Wendy Clark,"Backend,API,Microservices","[1,4,5,7]",3,BackEnd,Senior
+W24,Xavier Lopez,"Mobile,iOS,Android","[2,6,7]",2,Mobile,Mid
+W25,Yuki Tanaka,"DevOps,CI/CD,Jenkins","[1,3,5,6]",4,DevOps,Senior
+W26,Zoe Adams,"Content Writing,Documentation,Technical Writing","[2,4,5]",2,Content,Mid
+W27,Alex Morgan,"Cloud,AWS,GCP","[1,2,3,7]",3,Cloud,Senior
+W28,Blake Foster,"Database,SQL,NoSQL","[3,4,6,7]",3,Database,Expert
+W29,Chloe Turner,"UX Research,User Testing,Analytics","[1,5,6]",2,Research,Senior
+W30,Dylan Reed,"Blockchain,Cryptocurrency,Smart Contracts","[2,3,4]",2,Blockchain,Mid
+W31,Eva Phillips,"AI,Neural Networks,Deep Learning","[1,4,5]",3,AI,Expert
+W32,Finn Cooper,"Game Development,Unity,C#","[2,6,7]",2,GameDev,Senior
+W33,Gina Hayes,"Product Management,Strategy,Roadmap","[3,5,7]",4,Product,Expert
+W34,Hugo Bell,"Network,Infrastructure,Cisco","[1,2,6]",2,Network,Senior
+W35,Iris Ward,"Cybersecurity,Firewall,Monitoring","[4,5,6]",3,Security,Expert
+W36,Jake Murphy,"Python,Flask,FastAPI","[1,3,4,5]",5,BackEnd,Senior
+W37,Kelly Ross,"React Native,Flutter,Hybrid Apps","[2,4,7]",2,Mobile,Mid
+W38,Liam Scott,"Machine Learning,TensorFlow,PyTorch","[1,5,6,7]",4,ML,Expert
+W39,Maya Rivera,"Business Analysis,Requirements,Process","[2,3,5]",3,Business,Senior
+W40,Noah Cook,"Full Stack,MEAN,MERN","[1,4,6,7]",0,FullStack,Senior

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Upload, Database, Settings, Zap, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +27,8 @@ interface ValidationError {
 }
 
 export default function DataAlchemist() {
-  const { sessionData, clearSession } = useSession();
+  // ALWAYS declare all hooks in the same order - no conditional hooks
+  const { sessionData, clearSession, lastValidationResult } = useSession();
   const [activeTab, setActiveTab] = useState("upload");
   const [validationErrors, setValidationErrors] = useState({
     clients: 0,
@@ -38,6 +39,25 @@ export default function DataAlchemist() {
     []
   );
   const [rules, setRules] = useState<any[]>([]);
+
+  // All useEffect hooks should also be declared unconditionally
+  useEffect(() => {
+    if (lastValidationResult) {
+      console.log(
+        "Updating validation state from lastValidationResult:",
+        lastValidationResult
+      );
+
+      setValidationErrors(
+        lastValidationResult.errorCounts || {
+          clients: 0,
+          workers: 0,
+          tasks: 0,
+        }
+      );
+      setValidationDetails(lastValidationResult.errors || []);
+    }
+  }, [lastValidationResult]);
 
   const totalErrors = Object.values(validationErrors).reduce(
     (sum, count) => sum + count,
@@ -51,33 +71,36 @@ export default function DataAlchemist() {
 
     // Update validation state
     if (validation) {
-      setValidationErrors(validation.errorCounts);
-      setValidationDetails(validation.errors);
+      console.log("File uploaded, updating validation state:", validation);
+      setValidationErrors(
+        validation.errorCounts || {
+          clients: 0,
+          workers: 0,
+          tasks: 0,
+        }
+      );
+      setValidationDetails(validation.errors || []);
     }
   };
 
-  const handleDataChange = async (file: string, data: any[]) => {
-    // Re-run validation after data changes
-    try {
-      const response = await fetch("/api/validate-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sessionId:
-            sessionData.sessionId ||
-            localStorage.getItem("data-alchemist-session"),
-        }),
-      });
+  const handleDataChange = async (
+    file: string,
+    data: any[],
+    validation: any
+  ) => {
+    console.log("Data change detected:", { file, validation });
 
-      const result = await response.json();
-      if (result.success && result.validation) {
-        setValidationErrors(result.validation.errorCounts);
-        setValidationDetails(result.validation.errors);
-      }
-    } catch (error) {
-      console.error("Failed to re-validate data:", error);
+    // Update validation state from the returned validation result
+    if (validation) {
+      console.log("Updating validation state from data change:", validation);
+      setValidationErrors(
+        validation.errorCounts || {
+          clients: 0,
+          workers: 0,
+          tasks: 0,
+        }
+      );
+      setValidationDetails(validation.errors || []);
     }
   };
 
@@ -246,6 +269,13 @@ export default function DataAlchemist() {
                   validationDetails={validationDetails}
                   onDataChange={handleDataChange}
                 />
+                {totalErrors > 0 && (
+                  <ValidationPanel
+                    validationErrors={validationErrors}
+                    validationDetails={validationDetails}
+                    onErrorClick={handleErrorClick}
+                  />
+                )}
               </div>
             )}
 

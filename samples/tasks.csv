@@ -1,41 +1,61 @@
 TaskID,TaskName,Category,Duration,RequiredSkills,PreferredPhases,MaxConcurrent
-T101,Data Migration,ETL,5,"SQL,Python","1-2",4
-T102,Data Analysis,Analytics,3,"Python,R","[3,4]",2
-T103,BI Dashboard,Reporting,0,"Tableau,SQL","3-5",1
-T104,Feature Engineering,ML,6,"Python","[1,6]",3
-T105,API Development,Backend,,"Java,Python","2-4",5
-T106,Data Validation,QA,2,"SQL","[1,3,5]",4
-T107,Report Generation,Reporting,3,"BI","4-5","three"
-T108,Model Training,ML,8,"Python,R",,2
-T109,Database Indexing,DBA,2.5,"SQL","1-3",3
-T110,Data Cleansing,ETL,4,"Python","[2,4]",5
-T111,Schema Migration,DBA,3,"SQL","1-3",2
-T112,Performance Tuning,DBA,5,"SQL,Python","2-4",1
-T113,Data Archiving,ETL,6,"SQL","[4,5]",3
-T114,Real-time Dashboard,Reporting,4,"Tableau,SQL","3-5",2
-T115,A/B Testing Analysis,Analytics,3,"Python,R","[1,2]",4
-T116,Log Processing,ETL,4,"Python","1-4",5
-T117,Custom BI Report,Reporting,2,"BI,SQL","[3,5]",1
-T118,Model Deployment,ML,5,"Python","4-6",2
-T119,ETL Optimization,ETL,7,"SQL,Python","[1,3]",3
-T120,User Segmentation,Analytics,4,"Python,R","2-4",4
-T121,Backend Refactoring,Backend,8,"Java","[1,6]",2
-T122,Security Patching,Backend,2,"Java,Python","3-4",5
-T123,Data Governance,QA,3,"SQL","[1,2,3]",4
-T124,Ad-hoc Analysis,Analytics,2,"SQL,BI","4-5",2
-T125,Predictive Maintenance,ML,9,"Python,R",,1
-T126,Cloud Migration,ETL,10,"SQL,Python","1-5",3
-T127,Stream Processing,Backend,6,"Java","[2,4,6]",2
-T128,Data Cataloging,DBA,3,"SQL","1-3",4
-T129,Anomaly Detection,ML,5,"Python","[3,5]",3
-T130,Batch Processing,ETL,4,"Python","2-4",5
-T131,Financial Reporting,Reporting,3,"BI,SQL","[1,4]",1
-T132,Customer Churn,Analytics,4,"Python,R","3-5",2
-T133,Microservice Dev,Backend,7,"Java","[2,6]",3
-T134,Load Testing,QA,2,"Python","1-3",5
-T135,Data Lineage,DBA,3,"SQL","[2,4]",4
-T136,Sentiment Analysis,ML,5,"Python,R","3-6",2
-T137,Dashboard Revamp,Reporting,4,"Tableau,BI","[1,5]",1
-T138,Feature Store,ML,6,"Python,SQL","2-5",3
-T139,Compliance Check,QA,2,"SQL","[1,4]",4
-T140,Data Ingestion,ETL,3,"Python","1-3",5
+T1,User Authentication System,Security,5,"Python,Security,Database","[1,2]",2
+T2,Frontend Dashboard,UI/UX,3,"React,TypeScript,CSS","[2,3]",3
+T3,API Gateway Implementation,Backend,4,"Python,API,Microservices","[1,3]",2
+T4,Database Migration,Database,6,"SQL,Database,Python","[1]",1
+T5,Mobile App Development,Mobile,8,"React Native,JavaScript,Mobile","[2,4]",2
+T6,Data Analytics Pipeline,DataScience,7,"Python,Machine Learning,Statistics","[3,4]",2
+T7,Payment Integration,Backend,4,"Python,API,Security","[2,3]",1
+T8,User Interface Redesign,Design,5,"UI/UX,Figma,CSS","[1,2,3]",3
+T9,DevOps Pipeline Setup,DevOps,6,"DevOps,CI/CD,AWS","[1]",1
+T10,Quality Assurance Testing,Testing,4,"Testing,Selenium,QA","[4,5]",2
+T11,Performance Optimization,Backend,3,"Python,Database,Performance","[3,4]",2
+T12,Security Audit,Security,5,"Security,Penetration Testing,Compliance","[2,3]",1
+T13,Content Management System,FullStack,7,"Python,JavaScript,Database","[1,2,4]",2
+T14,Email Marketing Campaign,Marketing,2,"Marketing,Content,Analytics","[3,4]",4
+T15,Customer Support Portal,Frontend,0,"React,JavaScript,UI/UX","[2,3]",2
+T16,Inventory Management,Backend,6,"Python,Database,API","[1,3]",1
+T17,Social Media Integration,Frontend,3,"JavaScript,API,Social Media","[2,4]",3
+T18,Backup and Recovery System,Infrastructure,5,"DevOps,Database,Cloud","[1,2]",1
+T19,Real-time Chat Feature,FullStack,4,"JavaScript,WebSocket,Database","[3,4]",2
+T20,Financial Reporting,DataScience,6,"Data Analysis,Excel,SQL","[1,4]",1
+T21,Machine Learning Model,AI,10,"Machine Learning,Python,AI","[2,3,4]",1
+T22,Cloud Migration,Cloud,8,"Cloud,AWS,DevOps","[1,2]",1
+T23,Document Management,Backend,4,"Python,Database,File Management","[2,3]",2
+T24,User Onboarding Flow,Frontend,3,"React,UI/UX,JavaScript","[1,3]",3
+T25,API Documentation,Content,2,"Technical Writing,Documentation,API","[4,5]",5
+T26,Load Balancing Setup,Infrastructure,4,"DevOps,Network,Load Balancing","[1,2]",1
+T27,Search Functionality,Backend,5,"Python,Search,Database","[2,4]",2
+T28,Notification System,Backend,3,"Python,API,Messaging","[3,4]",3
+T29,Data Visualization,Frontend,4,"JavaScript,Charts,Data Visualization","[2,3]",2
+T30,Multi-tenant Architecture,Backend,8,"Python,Architecture,Database","[1,2]",1
+T30,Third-party Integrations,Backend,5,"API,Integration,Python","[2,3,4]",2
+T32,Automated Testing Suite,Testing,6,"Testing,Automation,CI/CD","[3,4]",2
+T33,User Permission System,Security,4,"Security,Database,Authorization","[1,3]",2
+T34,Error Monitoring,DevOps,3,"DevOps,Monitoring,Logging","[4,5]",3
+T35,Caching Implementation,Backend,3,"Caching,Performance,Backend","[2,3]",2
+T36,Admin Dashboard,Frontend,5,"React,Admin,Dashboard","[1,4]",2
+T37,Audit Trail System,Security,4,"Security,Logging,Compliance","[3,4]",1
+T38,File Upload Service,Backend,3,"Python,File Management,Storage","[2,4]",3
+T39,WebSocket Implementation,Backend,4,"WebSocket,Real-time,Backend","[1,3]",2
+T40,Data Export Feature,Backend,2,"Python,Data Export,API","[4,5]",4
+T41,Single Sign-On,Security,6,"Security,SSO,Authentication","[1,2]",1
+T42,GraphQL API,Backend,5,"GraphQL,API,Backend","[2,3]",2
+T43,Progressive Web App,Frontend,7,"PWA,JavaScript,Service Workers","[1,3,4]",2
+T44,Microservices Architecture,Backend,10,"Microservices,Docker,Kubernetes","[1,2,3]",1
+T45,Business Intelligence,DataScience,8,"BI,Analytics,Data Visualization","[2,4]",1
+T46,Legacy System Integration,Integration,6,"Integration,Legacy,API","[1,4]",1
+T47,Container Orchestration,DevOps,5,"Docker,Kubernetes,DevOps","[2,3]",1
+T48,Multi-language Support,Frontend,4,"Internationalization,Frontend,Translation","[3,4]",2
+T49,Blockchain Integration,Blockchain,12,"Blockchain,Smart Contracts,Web3","[1,2,4]",1
+T50,Voice Interface,AI,8,"Voice Recognition,AI,Natural Language","[3,4]",1
+T51,Compliance Framework,Compliance,6,"Compliance,Legal,Documentation","[1,3]",1
+T52,Customer Analytics,DataScience,5,"Analytics,Customer Data,Statistics","[2,4]",2
+T53,Recommendation Engine,AI,9,"Recommendation,Machine Learning,AI","[1,3]",1
+T54,Video Streaming,Multimedia,7,"Video,Streaming,CDN","[2,3]",2
+T55,Geolocation Services,Backend,4,"Geolocation,Maps,API","[1,4]",2
+T56,Code Review Automation,DevOps,3,"NonExistentSkill,Automation,CI/CD","[3,5]",3
+T57,Health Check Monitoring,DevOps,2,"Monitoring,Health Check,Alerts","[4,5]",4
+T58,Dynamic Configuration,Backend,3,"Configuration,Dynamic,Backend","[2,4]",3
+T59,Rate Limiting,Security,2,"Rate Limiting,Security,API","[3,4]",4
+T60,Data Archival,Database,4,"Data Archival,Database,Storage","[1,5]",2
