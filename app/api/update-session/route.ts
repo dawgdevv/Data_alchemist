@@ -4,7 +4,7 @@ import {
   updateSessionFile,
   debugSession,
   setSession,
-} from "@/lib/session-store";
+} from "@/lib/session-store-redis";
 
 interface ValidationError {
   id: string;
@@ -469,10 +469,10 @@ export async function POST(request: NextRequest) {
     console.log(`Session: ${sessionId}, File: ${fileType}`);
 
     // Debug: Check session state before update
-    debugSession(sessionId);
+    await debugSession(sessionId);
 
     // Get current session state before update
-    const beforeUpdate = getSession(sessionId);
+    const beforeUpdate = await getSession(sessionId);
     console.log(
       `Before update - Backend session files:`,
       Object.keys(beforeUpdate)
@@ -497,19 +497,19 @@ export async function POST(request: NextRequest) {
       if (missingFiles.length > 0) {
         console.log(`Restoring missing files:`, missingFiles);
         // Set the complete session data
-        setSession(sessionId, allSessionData);
+        await setSession(sessionId, allSessionData);
       }
     }
 
     // Now update the specific file
-    const sessionData = updateSessionFile(sessionId, fileType, data);
+    const sessionData = await updateSessionFile(sessionId, fileType, data);
 
     // Debug: Check session state after update
     console.log(
       `After update - Backend session files:`,
       Object.keys(sessionData)
     );
-    debugSession(sessionId);
+    await debugSession(sessionId);
 
     // Final verification - ensure we have all expected files
     const expectedFiles = ["clients", "workers", "tasks"];
@@ -540,7 +540,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get final session data
-    const finalSessionData = getSession(sessionId);
+    const finalSessionData = await getSession(sessionId);
     console.log(`Final session data files:`, Object.keys(finalSessionData));
 
     // Run validation on updated data

@@ -13,6 +13,8 @@ import ExportPanel from "@/components/export-panel";
 import AIAssistant from "@/components/ai-assistant";
 import { useSession } from "@/hooks/use-session";
 import Link from "next/link";
+import SessionManager from "@/components/session-manager";
+import RedisDebug from "@/components/redis-debug";
 
 interface ValidationError {
   id: string;
@@ -233,6 +235,7 @@ export default function DataAlchemist() {
           <div className="flex-1 overflow-auto p-6">
             {activeTab === "upload" && (
               <div className="space-y-6">
+                <RedisDebug />
                 <div>
                   <h2 className="text-2xl font-bold text-[#f38ba8] mb-2">
                     Upload Your Data Files
@@ -241,6 +244,7 @@ export default function DataAlchemist() {
                     Upload your CSV or XLSX files to begin data cleaning and
                     validation.
                   </p>
+                  <SessionManager />
                 </div>
                 <UploadZone onFileUploaded={handleFileUploaded} />
                 {totalErrors > 0 && (

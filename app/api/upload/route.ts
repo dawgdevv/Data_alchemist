@@ -6,7 +6,7 @@ import {
   setSession,
   updateSessionFile,
   hasSession,
-} from "@/lib/session-store";
+} from "@/lib/session-store-redis";
 
 interface ValidationError {
   id: string;
@@ -508,7 +508,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Store in session using shared store
-    const sessionData = updateSessionFile(sessionId, fileType, parsedData);
+    const sessionData = await updateSessionFile(
+      sessionId,
+      fileType,
+      parsedData
+    );
 
     // Run validation
     const validationResult = validateSessionData(sessionData);
@@ -586,6 +590,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "SessionId required" }, { status: 400 });
   }
 
-  const sessionData = getSession(sessionId);
+  const sessionData = await getSession(sessionId);
   return NextResponse.json({ sessionData });
 }

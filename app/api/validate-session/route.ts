@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/session-store";
+import { getSession } from "@/lib/session-store-redis";
 
 interface ValidationError {
   id: string;
@@ -462,7 +462,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`Validating session: ${sessionId}`);
 
-    const sessionData = getSession(sessionId);
+    const sessionData = await getSession(sessionId);
 
     // Debug: Log session state before validation
     console.log(`Session data keys:`, Object.keys(sessionData));
