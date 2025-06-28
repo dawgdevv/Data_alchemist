@@ -449,6 +449,7 @@ class ValidationEngine {
 }
 
 // Add better error handling and session verification
+// app/api/validate-session/route.ts
 export async function POST(request: NextRequest) {
   try {
     const { sessionId } = await request.json();
@@ -482,6 +483,15 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // ✅ ADD THIS: Better logging for debugging
+    Object.entries(sessionData).forEach(([fileType, data]) => {
+      console.log(
+        `${fileType}: ${data.data.length} rows, headers: ${data.headers.join(
+          ", "
+        )}`
+      );
+    });
+
     // Run validation
     const validationEngine = new ValidationEngine(sessionData);
     const validationResult = validationEngine.validate();
@@ -490,6 +500,11 @@ export async function POST(request: NextRequest) {
       `Validation complete. Errors found:`,
       validationResult.errors.length
     );
+
+    // ✅ ADD THIS: Log validation details for debugging
+    if (validationResult.errors.length > 0) {
+      console.log("Validation errors by file:", validationResult.errorCounts);
+    }
 
     return NextResponse.json({
       success: true,

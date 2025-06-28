@@ -21,6 +21,7 @@ export default function SessionManager() {
     checkSessionExists,
     deleteSessionFromServer,
     loadSessionData,
+    validateCurrentSession,
   } = useSession();
   const [sessionInput, setSessionInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -46,8 +47,26 @@ export default function SessionManager() {
   const restoreSession = async (id: string) => {
     setIsLoading(true);
     try {
+      // First copy the session ID to localStorage so loadSessionData can use it
+      localStorage.setItem("data-alchemist-session", id);
+
+      // Load the session data
       await loadSessionData();
       console.log("Session restored successfully");
+
+      // ✅ Trigger validation after successful restore with a small delay
+      setTimeout(async () => {
+        try {
+          console.log("Triggering validation after session restore...");
+          await validateCurrentSession();
+          console.log("Validation completed after session restore");
+        } catch (validationError) {
+          console.error(
+            "Failed to validate after session restore:",
+            validationError
+          );
+        }
+      }, 500);
     } catch (error) {
       console.error("Failed to restore session:", error);
     } finally {

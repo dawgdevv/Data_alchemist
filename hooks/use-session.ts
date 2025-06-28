@@ -57,33 +57,38 @@ export function useSession() {
     return {};
   }, []);
 
-  // Initialize session
-  useEffect(() => {
-    isMountedRef.current = true;
-
-    let id = "";
-    try {
-      id = localStorage.getItem(STORAGE_KEYS.SESSION_ID) || "";
-      if (!id) {
-        id = uuidv4();
-        localStorage.setItem(STORAGE_KEYS.SESSION_ID, id);
-      }
-      setSessionId(id);
-
-      // Load session data from Redis/backend
-      loadSessionData(id);
-    } catch (error) {
-      console.error("Failed to initialize session:", error);
-      id = uuidv4();
-      setSessionId(id);
-      localStorage.setItem(STORAGE_KEYS.SESSION_ID, id);
+  // Validation function
+  const validateCurrentSession = useCallback(async () => {
+    if (!sessionId || Object.keys(sessionData).length === 0) {
+      console.log("No session data to validate");
+      return null;
     }
 
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
+    try {
+      console.log("Running validation for current session...");
+      const response = await fetch("/api/validate-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ sessionId }),
+      });
 
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && isMountedRef.current) {
+          setLastValidationResult(result.validation);
+          console.log("Validation completed:", result.validation);
+          return result.validation;
+        }
+      }
+    } catch (error) {
+      console.error("Failed to validate session:", error);
+    }
+    return null;
+  }, [sessionId, sessionData]);
+
+  // Load session data function
   const loadSessionData = useCallback(
     async (id: string) => {
       if (!isMountedRef.current) return;
@@ -114,6 +119,41 @@ export function useSession() {
             );
             setSessionData(result.sessionData);
             backupToLocalStorage(result.sessionData);
+
+            // ✅ Run validation after loading session data
+            if (Object.keys(result.sessionData).length > 0) {
+              console.log("Running validation for restored session data...");
+              setTimeout(async () => {
+                try {
+                  const validationResponse = await fetch(
+                    "/api/validate-session",
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({ sessionId: id }),
+                    }
+                  );
+
+                  if (validationResponse.ok) {
+                    const validationResult = await validationResponse.json();
+                    if (validationResult.success && isMountedRef.current) {
+                      setLastValidationResult(validationResult.validation);
+                      console.log(
+                        "Validation completed for restored session:",
+                        validationResult.validation
+                      );
+                    }
+                  }
+                } catch (validationError) {
+                  console.error(
+                    "Failed to validate restored session:",
+                    validationError
+                  );
+                }
+              }, 100);
+            }
           }
         } else {
           console.log("No session found in Redis, checking localStorage...");
@@ -121,6 +161,38 @@ export function useSession() {
           if (Object.keys(localData).length > 0 && isMountedRef.current) {
             console.log("Using localStorage fallback data");
             setSessionData(localData);
+
+            // ✅ Run validation for localStorage data too
+            setTimeout(async () => {
+              try {
+                const validationResponse = await fetch(
+                  "/api/validate-session",
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ sessionId: id }),
+                  }
+                );
+
+                if (validationResponse.ok) {
+                  const validationResult = await validationResponse.json();
+                  if (validationResult.success && isMountedRef.current) {
+                    setLastValidationResult(validationResult.validation);
+                    console.log(
+                      "Validation completed for localStorage data:",
+                      validationResult.validation
+                    );
+                  }
+                }
+              } catch (validationError) {
+                console.error(
+                  "Failed to validate localStorage data:",
+                  validationError
+                );
+              }
+            }, 100);
           } else if (isMountedRef.current) {
             setSessionData({});
           }
@@ -143,172 +215,177 @@ export function useSession() {
     [backupToLocalStorage, restoreFromLocalStorage]
   );
 
-  const uploadFile = async (file: File, fileType: string) => {
-    if (!sessionId) {
-      throw new Error("Session not initialized");
-    }
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("fileType", fileType);
-    formData.append("sessionId", sessionId);
-
-    try {
-      setIsLoading(true);
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Upload failed with status: ${response.status}`);
+  // Upload file function
+  const uploadFile = useCallback(
+    async (file: File, fileType: string) => {
+      if (!sessionId) {
+        throw new Error("Session not initialized");
       }
 
-      const result = await response.json();
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("fileType", fileType);
+      formData.append("sessionId", sessionId);
 
-      if (result.success) {
-        if (isMountedRef.current) {
-          console.log(
-            "Upload result - Files:",
-            Object.keys(result.sessionData || {})
-          );
-          setSessionData(result.sessionData || {});
-          setLastValidationResult(result.validation || null);
-          backupToLocalStorage(result.sessionData || {});
+      try {
+        setIsLoading(true);
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Upload failed with status: ${response.status}`);
         }
-        return result;
-      } else {
-        throw new Error(result.error || "Upload failed");
+
+        const result = await response.json();
+
+        if (result.success) {
+          if (isMountedRef.current) {
+            console.log(
+              "Upload result - Files:",
+              Object.keys(result.sessionData || {})
+            );
+            setSessionData(result.sessionData || {});
+            setLastValidationResult(result.validation || null);
+            backupToLocalStorage(result.sessionData || {});
+          }
+          return result;
+        } else {
+          throw new Error(result.error || "Upload failed");
+        }
+      } catch (error) {
+        console.error("Upload failed:", error);
+        throw error;
+      } finally {
+        if (isMountedRef.current) {
+          setIsLoading(false);
+        }
       }
-    } catch (error) {
-      console.error("Upload failed:", error);
-      throw error;
-    } finally {
-      if (isMountedRef.current) {
-        setIsLoading(false);
+    },
+    [sessionId, backupToLocalStorage]
+  );
+
+  // Update session data function
+  const updateSessionData = useCallback(
+    async (fileType: string, newData: ParsedFileData) => {
+      if (!sessionId) {
+        throw new Error("Session not initialized");
       }
-    }
-  };
 
-  const updateSessionData = async (
-    fileType: string,
-    newData: ParsedFileData
-  ) => {
-    if (!sessionId) {
-      throw new Error("Session not initialized");
-    }
+      if (isUpdatingRef.current) {
+        console.warn("Update already in progress, queuing...");
+        pendingUpdatesRef.current.set(fileType, newData);
+        return Promise.resolve();
+      }
 
-    if (isUpdatingRef.current) {
-      console.warn("Update already in progress, queuing...");
-      pendingUpdatesRef.current.set(fileType, newData);
-      return Promise.resolve();
-    }
+      try {
+        isUpdatingRef.current = true;
+        setIsLoading(true);
 
-    try {
-      isUpdatingRef.current = true;
-      setIsLoading(true);
+        const originalData = { ...sessionData };
+        const localBackupData = restoreFromLocalStorage();
 
-      const originalData = { ...sessionData };
-      const localBackupData = restoreFromLocalStorage();
+        const optimisticUpdate = {
+          ...originalData,
+          ...localBackupData,
+          [fileType]: { ...newData },
+        };
 
-      const optimisticUpdate = {
-        ...originalData,
-        ...localBackupData,
-        [fileType]: { ...newData },
+        if (isMountedRef.current) {
+          setSessionData(optimisticUpdate);
+          backupToLocalStorage(optimisticUpdate);
+        }
+
+        const response = await fetch("/api/update-session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sessionId,
+            fileType,
+            data: newData,
+            allSessionData: optimisticUpdate,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Update failed with status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          if (isMountedRef.current) {
+            setSessionData(result.sessionData || {});
+
+            if (result.validation) {
+              setLastValidationResult(result.validation);
+            }
+
+            backupToLocalStorage(result.sessionData || {});
+          }
+          return result;
+        } else {
+          if (isMountedRef.current) {
+            setSessionData(originalData);
+            backupToLocalStorage(originalData);
+          }
+          throw new Error(result.error || "Update failed");
+        }
+      } catch (error) {
+        console.error("Update failed:", error);
+        const fallbackData = restoreFromLocalStorage();
+        if (Object.keys(fallbackData).length > 0 && isMountedRef.current) {
+          setSessionData(fallbackData);
+        }
+        throw error;
+      } finally {
+        isUpdatingRef.current = false;
+        if (isMountedRef.current) {
+          setIsLoading(false);
+        }
+
+        if (pendingUpdatesRef.current.size > 0) {
+          const [nextFileType, nextData] = pendingUpdatesRef.current
+            .entries()
+            .next().value;
+          pendingUpdatesRef.current.delete(nextFileType);
+
+          setTimeout(() => {
+            if (isMountedRef.current) {
+              updateSessionData(nextFileType, nextData);
+            }
+          }, 200);
+        }
+      }
+    },
+    [sessionId, sessionData, restoreFromLocalStorage, backupToLocalStorage]
+  );
+
+  // Update session cell function
+  const updateSessionCell = useCallback(
+    async (fileType: string, rowIndex: number, column: string, value: any) => {
+      const currentFileData = sessionData[fileType];
+      if (!currentFileData) {
+        throw new Error(`File type ${fileType} not found`);
+      }
+
+      const updatedData = {
+        ...currentFileData,
+        data: currentFileData.data.map((row, index) =>
+          index === rowIndex ? { ...row, [column]: value } : row
+        ),
       };
 
-      if (isMountedRef.current) {
-        setSessionData(optimisticUpdate);
-        backupToLocalStorage(optimisticUpdate);
-      }
+      const result = await updateSessionData(fileType, updatedData);
+      return result;
+    },
+    [sessionData, updateSessionData]
+  );
 
-      const response = await fetch("/api/update-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sessionId,
-          fileType,
-          data: newData,
-          allSessionData: optimisticUpdate,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Update failed with status: ${response.status}`);
-      }
-
-      const result = await response.json();
-
-      if (result.success) {
-        if (isMountedRef.current) {
-          setSessionData(result.sessionData || {});
-
-          if (result.validation) {
-            setLastValidationResult(result.validation);
-          }
-
-          backupToLocalStorage(result.sessionData || {});
-        }
-        return result;
-      } else {
-        if (isMountedRef.current) {
-          setSessionData(originalData);
-          backupToLocalStorage(originalData);
-        }
-        throw new Error(result.error || "Update failed");
-      }
-    } catch (error) {
-      console.error("Update failed:", error);
-      const fallbackData = restoreFromLocalStorage();
-      if (Object.keys(fallbackData).length > 0 && isMountedRef.current) {
-        setSessionData(fallbackData);
-      }
-      throw error;
-    } finally {
-      isUpdatingRef.current = false;
-      if (isMountedRef.current) {
-        setIsLoading(false);
-      }
-
-      if (pendingUpdatesRef.current.size > 0) {
-        const [nextFileType, nextData] = pendingUpdatesRef.current
-          .entries()
-          .next().value;
-        pendingUpdatesRef.current.delete(nextFileType);
-
-        setTimeout(() => {
-          if (isMountedRef.current) {
-            updateSessionData(nextFileType, nextData);
-          }
-        }, 200);
-      }
-    }
-  };
-
-  const updateSessionCell = async (
-    fileType: string,
-    rowIndex: number,
-    column: string,
-    value: any
-  ) => {
-    const currentFileData = sessionData[fileType];
-    if (!currentFileData) {
-      throw new Error(`File type ${fileType} not found`);
-    }
-
-    const updatedData = {
-      ...currentFileData,
-      data: currentFileData.data.map((row, index) =>
-        index === rowIndex ? { ...row, [column]: value } : row
-      ),
-    };
-
-    const result = await updateSessionData(fileType, updatedData);
-    return result;
-  };
-
+  // Check session exists function
   const checkSessionExists = useCallback(
     async (id: string): Promise<boolean> => {
       try {
@@ -325,6 +402,7 @@ export function useSession() {
     []
   );
 
+  // Delete session from server function
   const deleteSessionFromServer = useCallback(
     async (id: string): Promise<void> => {
       try {
@@ -337,6 +415,7 @@ export function useSession() {
     []
   );
 
+  // Clear session function
   const clearSession = useCallback(async () => {
     try {
       if (sessionId) {
@@ -360,6 +439,33 @@ export function useSession() {
     }
   }, [sessionId, deleteSessionFromServer]);
 
+  // Initialize session
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    let id = "";
+    try {
+      id = localStorage.getItem(STORAGE_KEYS.SESSION_ID) || "";
+      if (!id) {
+        id = uuidv4();
+        localStorage.setItem(STORAGE_KEYS.SESSION_ID, id);
+      }
+      setSessionId(id);
+
+      // Load session data from Redis/backend
+      loadSessionData(id);
+    } catch (error) {
+      console.error("Failed to initialize session:", error);
+      id = uuidv4();
+      setSessionId(id);
+      localStorage.setItem(STORAGE_KEYS.SESSION_ID, id);
+    }
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, [loadSessionData]);
+
   return {
     sessionId,
     sessionData,
@@ -374,5 +480,6 @@ export function useSession() {
     deleteSessionFromServer,
     backupToLocalStorage: () => backupToLocalStorage(sessionData),
     restoreFromLocalStorage,
+    validateCurrentSession,
   };
 }

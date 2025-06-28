@@ -30,7 +30,12 @@ interface ValidationError {
 
 export default function DataAlchemist() {
   // ALWAYS declare all hooks in the same order - no conditional hooks
-  const { sessionData, clearSession, lastValidationResult } = useSession();
+  const {
+    sessionData,
+    clearSession,
+    lastValidationResult,
+    validateCurrentSession,
+  } = useSession();
   const [activeTab, setActiveTab] = useState("upload");
   const [validationErrors, setValidationErrors] = useState({
     clients: 0,
@@ -60,6 +65,28 @@ export default function DataAlchemist() {
       setValidationDetails(lastValidationResult.errors || []);
     }
   }, [lastValidationResult]);
+
+  // ✅ Fixed useEffect with proper dependencies
+  useEffect(() => {
+    const runValidationIfNeeded = async () => {
+      // Only run validation if we have session data but no validation result
+      if (
+        Object.keys(sessionData).length > 0 &&
+        (!lastValidationResult || lastValidationResult.errors.length === 0)
+      ) {
+        console.log(
+          "Session data loaded but no validation result, running validation..."
+        );
+        if (validateCurrentSession) {
+          await validateCurrentSession();
+        }
+      }
+    };
+
+    // Small delay to ensure session is fully loaded
+    const timeoutId = setTimeout(runValidationIfNeeded, 100);
+    return () => clearTimeout(timeoutId);
+  }, [sessionData, lastValidationResult, validateCurrentSession]);
 
   const totalErrors = Object.values(validationErrors).reduce(
     (sum, count) => sum + count,
