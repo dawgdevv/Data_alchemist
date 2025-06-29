@@ -133,11 +133,9 @@ export default function AIAssistant({ uploadedFiles }) {
 
   const quickSuggestions = [
     "Run comprehensive AI validation",
-    "What's my data quality grade?",
     "Show high-priority issues only",
     "Auto-fix all fixable problems",
     "Analyze data patterns and anomalies",
-    "Generate data quality report",
     "Show me skill coverage gaps",
     "Estimate time to fix all issues",
   ];
