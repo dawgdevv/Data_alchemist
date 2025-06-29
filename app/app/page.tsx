@@ -56,6 +56,7 @@ export default function DataAlchemist() {
     },
     profile: "custom",
   });
+  const [aiReloadKey, setAiReloadKey] = useState(0);
 
   // All useEffect hooks should also be declared unconditionally
   useEffect(() => {
@@ -104,7 +105,11 @@ export default function DataAlchemist() {
   );
   const uploadedCount = Object.keys(sessionData).length;
 
-  const handleFileUploaded = (fileType: string, data: any, validation: any) => {
+  const handleFileUploaded = async (
+    fileType: string,
+    data: any,
+    validation: any
+  ) => {
     // Switch to data tab after successful upload
     setActiveTab("data");
 
@@ -120,6 +125,7 @@ export default function DataAlchemist() {
       );
       setValidationDetails(validation.errors || []);
     }
+    setAiReloadKey((prev) => prev + 1);
   };
 
   const handleDataChange = async (
@@ -453,7 +459,7 @@ export default function DataAlchemist() {
           </div>
 
           {/* AI Assistant Panel */}
-          <AIAssistant />
+          <AIAssistant key={aiReloadKey} uploadedFiles={uploadedFiles} />
         </main>
       </div>
     </div>

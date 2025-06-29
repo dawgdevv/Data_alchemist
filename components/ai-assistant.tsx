@@ -69,7 +69,7 @@ interface ValidationSummary {
   recommendation: string;
 }
 
-export default function AIAssistant() {
+export default function AIAssistant({ uploadedFiles }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -86,10 +86,50 @@ export default function AIAssistant() {
     useState<ValidationSummary | null>(null);
   const { sessionId, sessionData, validateCurrentSession } = useSession();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const previousSessionDataRef = useRef<any>({});
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // ✅ Detect file uploads and show processing message
+  useEffect(() => {
+    const currentFiles = Object.keys(sessionData);
+    const previousFiles = Object.keys(previousSessionDataRef.current);
+
+    // Detect any change in uploaded files (new files or replacements)
+    if (
+      currentFiles.length > 0 &&
+      (currentFiles.length !== previousFiles.length ||
+        !currentFiles.every((f) => previousFiles.includes(f)))
+    ) {
+      const newFiles = currentFiles.filter(
+        (file) => !previousFiles.includes(file)
+      );
+
+      // Only show message if there are new files
+      if (newFiles.length > 0) {
+        const newMessage: Message = {
+          id: `upload-${Date.now()}`,
+          type: "assistant",
+          content: `🎉 **Files detected!** I can now analyze: ${currentFiles.join(
+            ", "
+          )}\n\n✨ **Ready to help you with:**\n• Run comprehensive validation\n• Check data quality\n• Find patterns and issues\n• Generate insights\n\nJust ask me anything about your data!`,
+          timestamp: new Date(),
+          metadata: {
+            category: "file_upload",
+            priority: "medium",
+            aiGenerated: true,
+          },
+        };
+
+        setMessages((prev) => [...prev, newMessage]);
+      }
+    }
+
+    // Update tracking reference
+    previousSessionDataRef.current = sessionData;
+  }, [sessionData]);
 
   const quickSuggestions = [
     "Run comprehensive AI validation",

@@ -214,7 +214,7 @@ Use the provided `test-cases.csv` file to validate the application's error detec
 
 ### Key Components
 
-```
+```bash
 components/
 ├── ai-assistant.tsx      # AI-powered data interaction
 ├── data-grid.tsx         # Interactive data table
@@ -277,24 +277,6 @@ pnpm build
 pnpm start
 ```
 
-## 🛣️ Roadmap
-
-### Upcoming Features
-
-- [ ] Advanced AI-powered data cleaning suggestions
-- [ ] Batch processing for large datasets
-- [ ] Integration with external data sources
-- [ ] Enhanced visualization and reporting
-- [ ] Collaborative editing features
-- [ ] REST API for programmatic access
-
-### Performance Improvements
-
-- [ ] Streaming file processing
-- [ ] Enhanced caching strategies
-- [ ] Background job processing
-- [ ] Database integration options
-
 ## 🤝 Contributing
 
 We welcome contributions! Please follow these steps:
@@ -317,5 +299,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Redis** for reliable session management
 
 ---
-
-**Built with ❤️ for better data management**
