@@ -74,21 +74,31 @@ export default function ValidationPanel({
 
   const generateAiPriorities = async () => {
     try {
-      const response = await fetch("/api/ai-error-prioritization", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          errors: validationDetails.slice(0, 10), // Limit for performance
-          sessionData: {}, // Pass session context if available
-        }),
+      // Simple priority calculation based on error severity and type
+      const priorities: { [key: string]: number } = {};
+
+      validationDetails.forEach((error) => {
+        let priority = 0.5; // Default priority
+
+        // Prioritize based on severity
+        if (error.severity === "error") priority += 0.3;
+        else if (error.severity === "warning") priority += 0.1;
+
+        // Prioritize based on rule type
+        if (error.rule.includes("Missing")) priority += 0.2;
+        if (error.rule.includes("Duplicate")) priority += 0.25;
+        if (error.rule.includes("Invalid")) priority += 0.15;
+
+        // Prioritize data integrity issues
+        if (error.rule.includes("JSON") || error.rule.includes("Format"))
+          priority += 0.1;
+
+        priorities[error.id] = Math.min(1.0, priority);
       });
 
-      const result = await response.json();
-      if (result.success) {
-        setAiPriorities(result.priorities);
-      }
+      setAiPriorities(priorities);
     } catch (error) {
-      console.error("Failed to get AI priorities:", error);
+      console.error("Failed to calculate priorities:", error);
     }
   };
 

@@ -260,66 +260,68 @@ ${insights.recommendedActions.map((action: string) => `• ${action}`).join("\n"
       }
     }
 
-    // ✅ Data Quality Score Query
+    // ✅ Data Quality Score Query (Simplified)
     if (
       lowerInput.includes("quality score") ||
       lowerInput.includes("quality grade") ||
       lowerInput.includes("data grade")
     ) {
-      try {
-        const response = await fetch("/api/ai-quality-assessment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId }),
-        });
+      // Simple quality assessment based on available data
+      const totalErrors = Object.values(sessionData).reduce((sum, fileData) => {
+        return (
+          sum +
+          fileData.data.filter((row) =>
+            Object.values(row).some((val) => !val || val === "" || val === null)
+          ).length
+        );
+      }, 0);
 
-        const result = await response.json();
-        if (result.success) {
-          const assessment = result.assessment;
+      const totalRows = Object.values(sessionData).reduce(
+        (sum, fileData) => sum + fileData.data.length,
+        0
+      );
+      const qualityScore =
+        totalRows > 0 ? Math.max(0, (totalRows - totalErrors) / totalRows) : 0;
+      const grade = getQualityGrade(qualityScore);
 
-          return {
-            content: `📈 **Data Quality Assessment**
+      return {
+        content: `📈 **Data Quality Assessment**
 
-🎯 **Overall Score:** ${Math.round(assessment.overallScore * 100)}%
-📊 **Grade:** ${getQualityGrade(assessment.overallScore)}
+🎯 **Overall Score:** ${Math.round(qualityScore * 100)}%
+📊 **Grade:** ${grade}
 
-**Quality Breakdown:**
-• **Completeness:** ${Math.round(assessment.completeness * 100)}%
-• **Consistency:** ${Math.round(assessment.consistency * 100)}%
-• **Accuracy:** ${Math.round(assessment.accuracy * 100)}%
+**Quality Analysis:**
+• **Completeness:** ${Math.round(
+          (1 - totalErrors / Math.max(totalRows, 1)) * 100
+        )}%
+• **Total Records:** ${totalRows}
+• **Issues Found:** ${totalErrors}
 
-**File Scores:**
-${Object.entries(assessment.fileScores)
-  .map(
-    ([file, score]: [string, any]) => `• ${file}: ${Math.round(score * 100)}%`
-  )
+**File Breakdown:**
+${Object.entries(sessionData)
+  .map(([file, data]) => `• ${file}: ${data.data.length} rows`)
   .join("\n")}
 
-**Recommendations:**
-${
-  assessment.recommendations
-    ?.slice(0, 3)
-    .map((r: string) => `• ${r}`)
-    .join("\n") || "• Your data quality looks good!"
-}`,
-            suggestion: {
-              action: "Generate Quality Report",
-              preview: `Grade: ${getQualityGrade(
-                assessment.overallScore
-              )} (${Math.round(assessment.overallScore * 100)}%)`,
-              type: "quality",
-              data: assessment,
-            },
-            metadata: {
-              confidence: 0.95,
-              category: "quality_assessment",
-              priority: assessment.overallScore < 0.7 ? "high" : "medium",
-            },
-          };
-        }
-      } catch (error) {
-        console.error("Quality assessment failed:", error);
-      }
+**Status:** ${qualityScore >= 0.8 ? "✅ Ready for use" : "⚠️ Needs attention"}
+**Recommendation:** ${
+          qualityScore >= 0.8
+            ? "Data quality is good!"
+            : "Fix validation issues first"
+        }`,
+        suggestion:
+          qualityScore < 0.8
+            ? {
+                action: "Run Validation",
+                preview: `Fix ${totalErrors} issues to improve quality`,
+                type: "validation",
+              }
+            : undefined,
+        metadata: {
+          confidence: 0.85,
+          category: "quality_assessment",
+          priority: qualityScore < 0.7 ? "high" : "medium",
+        },
+      };
     }
 
     // ✅ High Priority Issues Query
@@ -440,71 +442,84 @@ ${
       }
     }
 
-    // ✅ Pattern Detection Query
+    // ✅ Pattern Detection Query (Simplified)
     if (
       lowerInput.includes("pattern") ||
       lowerInput.includes("anomal") ||
       lowerInput.includes("unusual")
     ) {
-      try {
-        const response = await fetch("/api/ai-pattern-detection", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId }),
-        });
+      // Simple pattern detection based on data structure
+      const patterns = [];
+      let anomalies = 0;
 
-        const result = await response.json();
-        if (result.success) {
-          const patterns = result.analysis.patterns || [];
-          const anomalies = result.analysis.anomalies || [];
+      // Check for common patterns and anomalies
+      Object.entries(sessionData).forEach(([fileType, fileData]) => {
+        const emptyRowCount = fileData.data.filter((row) =>
+          Object.values(row).every((val) => !val || val === "")
+        ).length;
 
-          return {
-            content: `🔍 **Pattern Analysis Complete**
+        if (emptyRowCount > 0) {
+          patterns.push(`Empty rows in ${fileType}: ${emptyRowCount} found`);
+          anomalies++;
+        }
+
+        // Check for duplicate values in key fields
+        if (fileType === "clients" && fileData.data.length > 0) {
+          const clientIds = fileData.data
+            .map((row) => row.ClientID)
+            .filter(Boolean);
+          const duplicates = clientIds.length - new Set(clientIds).size;
+          if (duplicates > 0) {
+            patterns.push(
+              `Duplicate ClientIDs in ${fileType}: ${duplicates} found`
+            );
+            anomalies++;
+          }
+        }
+
+        // Check for unusual data lengths
+        if (fileData.data.length < 5 && fileData.data.length > 0) {
+          patterns.push(
+            `Small dataset in ${fileType}: only ${fileData.data.length} records`
+          );
+        }
+      });
+
+      return {
+        content: `🔍 **Pattern Analysis Complete**
 
 **Patterns Detected:** ${patterns.length}
-**Anomalies Found:** ${anomalies.length}
+**Anomalies Found:** ${anomalies}
 
 **Key Patterns:**
-${patterns
-  .slice(0, 3)
-  .map((p: any) => `• ${p.description} (${p.severity} severity)`)
-  .join("\n")}
-
-**Notable Anomalies:**
-${anomalies
-  .slice(0, 3)
-  .map(
-    (a: any) =>
-      `• ${a.description} (${Math.round(a.confidence * 100)}% confidence)`
-  )
-  .join("\n")}
+${
+  patterns.length > 0
+    ? patterns
+        .slice(0, 3)
+        .map((p) => `• ${p}`)
+        .join("\n")
+    : "• No unusual patterns detected"
+}
 
 ${
-  patterns.length + anomalies.length === 0
+  patterns.length === 0
     ? "✅ **No unusual patterns detected** - Your data follows expected patterns."
     : "📊 **Analysis complete** - Review patterns for optimization opportunities."
 }`,
-            suggestion:
-              patterns.length + anomalies.length > 0
-                ? {
-                    action: "View Pattern Report",
-                    preview: `${patterns.length} patterns, ${anomalies.length} anomalies`,
-                    type: "patterns",
-                    data: result.analysis,
-                  }
-                : undefined,
-            metadata: {
-              confidence: 0.85,
-              category: "pattern_analysis",
-              priority: patterns.some((p: any) => p.severity === "high")
-                ? "high"
-                : "medium",
-            },
-          };
-        }
-      } catch (error) {
-        console.error("Pattern detection failed:", error);
-      }
+        suggestion:
+          patterns.length > 0
+            ? {
+                action: "Run Data Validation",
+                preview: `${patterns.length} patterns detected`,
+                type: "validation",
+              }
+            : undefined,
+        metadata: {
+          confidence: 0.8,
+          category: "pattern_analysis",
+          priority: anomalies > 2 ? "high" : "medium",
+        },
+      };
     }
 
     // ✅ Data Quality Report Generation
@@ -567,168 +582,287 @@ ${Object.entries(result.aiValidation.dataQuality.fileScores)
       }
     }
 
-    // ✅ NEW: Smart Rule Recommendations
+    // ✅ Smart Rule Recommendations (Simplified)
     if (
       lowerInput.includes("recommend") &&
       (lowerInput.includes("rule") || lowerInput.includes("optimization"))
     ) {
-      try {
-        const response = await fetch("/api/ai-rule-recommendations", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId }),
-        });
+      // Simple rule recommendations based on data patterns
+      const recommendations = [];
 
-        const result = await response.json();
-        if (result.success) {
-          const { recommendedRules, conflictWarnings } = result.recommendations;
+      if (sessionData.tasks && sessionData.workers) {
+        const taskCount = sessionData.tasks.data.length;
+        const workerCount = sessionData.workers.data.length;
 
-          return {
-            content: `🎯 **Smart Rule Recommendations**\n\n**Found ${
-              recommendedRules.length
-            } optimization opportunities:**\n${recommendedRules
-              .slice(0, 3)
-              .map((r: any) => `• ${r.name}: ${r.reasoning}`)
-              .join("\n")}${
-              conflictWarnings.length > 0
-                ? `\n\n⚠️ ${conflictWarnings.length} potential conflicts detected`
-                : ""
-            }`,
-            suggestion: {
-              action: "Apply Recommended Rules",
-              preview: `${recommendedRules.length} smart rules ready`,
-              type: "rule-recommendations",
-              data: result.recommendations,
-            },
-          };
+        if (taskCount > workerCount * 3) {
+          recommendations.push(
+            "Consider load balancing - many tasks per worker"
+          );
         }
-      } catch (error) {
-        console.error("Rule recommendations failed:", error);
+
+        if (workerCount > taskCount * 2) {
+          recommendations.push("Worker utilization could be improved");
+        }
       }
+
+      if (sessionData.clients) {
+        const highPriorityClients = sessionData.clients.data.filter(
+          (client) => parseInt(client.PriorityLevel) >= 4
+        ).length;
+
+        if (highPriorityClients > sessionData.clients.data.length * 0.5) {
+          recommendations.push(
+            "Too many high-priority clients - consider priority rebalancing"
+          );
+        }
+      }
+
+      return {
+        content: `🎯 **Smart Rule Recommendations**
+
+**Found ${recommendations.length} optimization opportunities:**
+${
+  recommendations.length > 0
+    ? recommendations.map((r) => `• ${r}`).join("\n")
+    : "• Current setup looks well balanced"
+}
+
+**Quick Suggestions:**
+• Set up worker load limits to prevent overallocation
+• Define skill-based task assignment rules
+• Create priority-based scheduling constraints
+
+**Next Steps:**
+${
+  recommendations.length > 0
+    ? "Review the suggestions and implement in Rule Builder"
+    : "Your current configuration appears optimized"
+}`,
+        suggestion: {
+          action: "Open Rule Builder",
+          preview: `${recommendations.length} suggestions available`,
+          type: "rule",
+        },
+        metadata: {
+          confidence: 0.75,
+          category: "rule_recommendations",
+          priority: recommendations.length > 2 ? "high" : "medium",
+        },
+      };
     }
 
-    // ✅ NEW: Data Enrichment Suggestions
+    // ✅ Data Enrichment Suggestions (Simplified)
     if (
       lowerInput.includes("improve") ||
       lowerInput.includes("enhance") ||
       lowerInput.includes("missing")
     ) {
-      try {
-        const response = await fetch("/api/ai-enrichment-suggestions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId }),
-        });
+      // Simple enrichment analysis based on standard fields
+      const suggestions = [];
+      const missingFields = [];
 
-        const result = await response.json();
-        if (result.success) {
-          const { missingFields, dataImprovements } = result.suggestions;
+      // Check for common missing fields
+      Object.entries(sessionData).forEach(([fileType, fileData]) => {
+        if (fileType === "clients" && fileData.data.length > 0) {
+          const hasEmail = fileData.data.some(
+            (row) => row.Email || row.ContactEmail
+          );
+          const hasPhone = fileData.data.some(
+            (row) => row.Phone || row.ContactPhone
+          );
 
-          return {
-            content: `🚀 **Data Enhancement Opportunities**\n\n**Missing Fields (${
-              missingFields.length
-            }):**\n${missingFields
-              .slice(0, 2)
-              .map(
-                (f: any) => `• ${f.suggestedField} in ${f.file}: ${f.reasoning}`
-              )
-              .join("\n")}\n\n**Improvements (${
-              dataImprovements.length
-            }):**\n${dataImprovements
-              .slice(0, 2)
-              .map((i: any) => `• ${i.description}`)
-              .join("\n")}`,
-            suggestion: {
-              action: "View Enhancement Guide",
-              preview: `${
-                missingFields.length + dataImprovements.length
-              } improvements identified`,
-              type: "enrichment",
-              data: result.suggestions,
-            },
-          };
+          if (!hasEmail) missingFields.push("Email/ContactEmail in clients");
+          if (!hasPhone) missingFields.push("Phone/ContactPhone in clients");
         }
-      } catch (error) {
-        console.error("Enrichment suggestions failed:", error);
+
+        if (fileType === "workers" && fileData.data.length > 0) {
+          const hasExperience = fileData.data.some(
+            (row) => row.Experience || row.YearsExperience
+          );
+          const hasCostRate = fileData.data.some(
+            (row) => row.CostRate || row.HourlyRate
+          );
+
+          if (!hasExperience) missingFields.push("Experience level in workers");
+          if (!hasCostRate) missingFields.push("Cost/Hourly rate in workers");
+        }
+
+        if (fileType === "tasks" && fileData.data.length > 0) {
+          const hasDeadline = fileData.data.some(
+            (row) => row.Deadline || row.DueDate
+          );
+          const hasPriority = fileData.data.some(
+            (row) => row.Priority || row.TaskPriority
+          );
+
+          if (!hasDeadline) missingFields.push("Deadline/DueDate in tasks");
+          if (!hasPriority) missingFields.push("Priority level in tasks");
+        }
+      });
+
+      // Check for data improvements
+      if (sessionData.clients) {
+        const incompleteClients = sessionData.clients.data.filter(
+          (row) => !row.AttributesJSON || row.AttributesJSON === "{}"
+        ).length;
+
+        if (incompleteClients > 0) {
+          suggestions.push(
+            `${incompleteClients} clients have incomplete attributes`
+          );
+        }
       }
+
+      return {
+        content: `🚀 **Data Enhancement Opportunities**
+
+**Missing Fields (${missingFields.length}):**
+${
+  missingFields.length > 0
+    ? missingFields
+        .slice(0, 3)
+        .map((f) => `• ${f}`)
+        .join("\n")
+    : "• All standard fields are present"
+}
+
+**Potential Improvements (${suggestions.length}):**
+${
+  suggestions.length > 0
+    ? suggestions.map((s) => `• ${s}`).join("\n")
+    : "• Data structure looks complete"
+}
+
+**Enhancement Recommendations:**
+• Add contact information (email, phone) for better communication
+• Include experience levels and rates for better resource planning
+• Set deadlines and priorities for improved task management
+• Enrich client attributes with additional business context
+
+**Impact:** ${
+          missingFields.length + suggestions.length > 0
+            ? "These enhancements will improve data usability and planning accuracy"
+            : "Your data is well-structured for current needs"
+        }`,
+        suggestion:
+          missingFields.length > 0
+            ? {
+                action: "Review Data Structure",
+                preview: `${missingFields.length} fields could be added`,
+                type: "enhancement",
+              }
+            : undefined,
+        metadata: {
+          confidence: 0.8,
+          category: "data_enrichment",
+          priority: missingFields.length > 2 ? "medium" : "low",
+        },
+      };
     }
 
-    // ✅ Enhanced Natural Language Search
+    // ✅ Natural Language Search (Simplified)
     if (
       lowerInput.includes("show") ||
       lowerInput.includes("find") ||
       lowerInput.includes("search") ||
       lowerInput.includes("list")
     ) {
-      try {
-        const response = await fetch("/api/ai-advanced-search", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            sessionId,
-            query: input,
-            context: {
-              previousQueries: messages
-                .filter((m) => m.type === "user")
-                .slice(-3)
-                .map((m) => m.content),
-            },
-          }),
+      // Simple search implementation using basic string matching
+      let results = [];
+      let targetTable = "";
+
+      // Extract search parameters
+      if (lowerInput.includes("task")) {
+        targetTable = "tasks";
+        if (sessionData.tasks) {
+          results = sessionData.tasks.data.filter((row) => {
+            const searchableText = Object.values(row).join(" ").toLowerCase();
+            return lowerInput
+              .split(" ")
+              .some((term) => term.length > 2 && searchableText.includes(term));
+          });
+        }
+      } else if (lowerInput.includes("worker")) {
+        targetTable = "workers";
+        if (sessionData.workers) {
+          results = sessionData.workers.data.filter((row) => {
+            const searchableText = Object.values(row).join(" ").toLowerCase();
+            return lowerInput
+              .split(" ")
+              .some((term) => term.length > 2 && searchableText.includes(term));
+          });
+        }
+      } else if (lowerInput.includes("client")) {
+        targetTable = "clients";
+        if (sessionData.clients) {
+          results = sessionData.clients.data.filter((row) => {
+            const searchableText = Object.values(row).join(" ").toLowerCase();
+            return lowerInput
+              .split(" ")
+              .some((term) => term.length > 2 && searchableText.includes(term));
+          });
+        }
+      } else {
+        // Search all tables
+        Object.entries(sessionData).forEach(([table, data]) => {
+          const matches = data.data.filter((row) => {
+            const searchableText = Object.values(row).join(" ").toLowerCase();
+            return lowerInput
+              .split(" ")
+              .some((term) => term.length > 2 && searchableText.includes(term));
+          });
+          if (matches.length > 0) {
+            results = [
+              ...results,
+              ...matches.map((match) => ({ ...match, _table: table })),
+            ];
+            if (!targetTable) targetTable = table;
+          }
         });
+      }
 
-        const result = await response.json();
-        if (result.success) {
-          const { results, explanation, confidence, suggestedFollowUps } =
-            result.response;
+      return {
+        content: `🔍 **Search Results** ${
+          targetTable ? `in ${targetTable}` : "across all data"
+        }
 
-          return {
-            content: `🔍 **${explanation}** (${Math.round(
-              confidence * 100
-            )}% confidence)
-
-**Results:** ${results.length} matching records found
+**Found:** ${results.length} matching records
 
 ${
   results.length > 0
     ? `**Sample Results:**\n${results
-        .slice(0, 2)
+        .slice(0, 3)
         .map(
           (r: any, i: number) =>
             `${i + 1}. ${Object.entries(r)
+              .filter(([k]) => !k.startsWith("_"))
               .slice(0, 3)
               .map(([k, v]) => `${k}: ${v}`)
               .join(", ")}`
         )
         .join("\n")}`
-    : "**No matching records found** - Try adjusting your search criteria."
+    : "**No matching records found** - Try different search terms or check your data."
 }
 
-**Suggested Follow-ups:**
-${
-  suggestedFollowUps
-    ?.slice(0, 2)
-    .map((f: string) => `• ${f}`)
-    .join("\n") || "• No additional suggestions"
-}`,
-            suggestion:
-              results.length > 0
-                ? {
-                    action: "View All Results",
-                    preview: `${results.length} results found`,
-                    type: "search",
-                    data: result.response,
-                  }
-                : undefined,
-            metadata: {
-              confidence: confidence || 0.8,
-              category: "advanced_search",
-              priority: "medium",
-            },
-          };
-        }
-      } catch (error) {
-        console.error("Advanced search failed:", error);
-      }
+**Search Tips:**
+• Use specific terms like "Python", "urgent", or task names
+• Try "show tasks with duration > 3" for numeric filters
+• Search by file type: "find workers with..." or "show clients..."`,
+        suggestion:
+          results.length > 0
+            ? {
+                action: "View Data Grid",
+                preview: `${results.length} results found`,
+                type: "search",
+                data: { results, targetTable },
+              }
+            : undefined,
+        metadata: {
+          confidence: 0.7,
+          category: "search",
+          priority: "low",
+        },
+      };
     }
 
     // ✅ Time Estimation Query
