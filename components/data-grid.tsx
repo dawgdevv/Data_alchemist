@@ -150,7 +150,7 @@ export default function DataGrid({
 
   // Add this function to get AI suggestions for cell editing
   const getAiCellSuggestion = async (
-    fileType: string,
+    tableKey: string,
     rowIndex: number,
     column: string,
     currentValue: any
@@ -161,20 +161,20 @@ export default function DataGrid({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId,
-          fileType,
+          fileType: tableKey,
           rowIndex,
           column,
           currentValue,
           context: {
-            rowData: data?.data[rowIndex],
-            columnData: data?.data.map((row) => row[column]),
+            rowData: sessionData[tableKey]?.data[rowIndex],
+            columnData: sessionData[tableKey]?.data.map((row) => row[column]),
           },
         }),
       });
 
       const result = await response.json();
       if (result.success && result.suggestion) {
-        const suggestionKey = `${fileType}-${rowIndex}-${column}`;
+        const suggestionKey = `${tableKey}-${rowIndex}-${column}`;
         setAiSuggestions((prev) => ({
           ...prev,
           [suggestionKey]: result.suggestion,
@@ -185,8 +185,23 @@ export default function DataGrid({
     }
   };
 
-  const renderCell = (value: any, rowIndex: number, column: string) => {
-    const suggestionKey = `${fileType}-${rowIndex}-${column}`;
+  const applySuggestion = async (
+    rowIndex: number,
+    column: string,
+    value: any
+  ) => {
+    // This would apply the AI suggestion to the cell
+    // For now, we'll just set the edit value
+    setEditValue(value);
+  };
+
+  const renderCell = (
+    value: any,
+    rowIndex: number,
+    column: string,
+    tableKey: string
+  ) => {
+    const suggestionKey = `${tableKey}-${rowIndex}-${column}`;
     const aiSuggestion = aiSuggestions[suggestionKey];
 
     return (
