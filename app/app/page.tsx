@@ -367,7 +367,8 @@ export default function DataAlchemist() {
               <div className="space-y-6">
                 <div>
                   <h2 className="text-2xl font-bold text-[#f38ba8] mb-2">
-                    Upload Your Data Files
+                    Upload Your Data Files(Wait for 1-2 seconds to get data
+                    replicted)
                   </h2>
                   <p className="text-[#6c7086] mb-6">
                     Upload your CSV or XLSX files to begin data cleaning and
@@ -390,7 +391,7 @@ export default function DataAlchemist() {
               <div className="space-y-6">
                 <div>
                   <h2 className="text-2xl font-bold text-[#a6e3a1] mb-2">
-                    Data Grid(Wait for 1-2 seconds to load)
+                    Data Grid
                   </h2>
                   <p className="text-[#6c7086] mb-6">
                     Review and edit your uploaded data. Click on any cell to
