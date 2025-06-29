@@ -8,6 +8,14 @@
 
 **Data Alchemist** is an intelligent web application that transforms messy spreadsheet data into clean, validated, and well-structured datasets. Built for resource planning scenarios involving clients, workers, and tasks, it combines powerful validation rules with AI-assisted data cleaning and natural language interactions.
 
+## Test From files /samples directory or use your own 3 data files
+
+1. **Upload the sample files** from the `/samples` directory
+2. **Review validation results** in the Validation Panel
+3. **Test AI features** using natural language queries
+4. **Create custom rules** using the Rule Builder
+5. **Export cleaned data** and verify the output format
+
 ## 🎯 Key Features
 
 ### 📊 Core Functionality
