@@ -1044,62 +1044,57 @@ Return ONLY a JSON object with this structure:
     // Log the original response for debugging
     console.log("Original response length:", response.length);
 
-    // Remove markdown code blocks more aggressively
+    // Remove markdown code blocks
     let cleaned = response
       .replace(/```json\s*/gi, "")
       .replace(/```\s*/g, "")
-      .replace(/```/g, "")
       .trim();
 
-    // Handle cases where the response starts with explanatory text
-    const jsonStartPatterns = [
-      /\[[\s\S]*\]/, // Array pattern
-      /\{[\s\S]*\}/, // Object pattern
-    ];
+    // Attempt to find the first JSON structure in the response
+    const jsonStart = cleaned.search(/[\{\[]/);
+    if (jsonStart !== -1) {
+      // Find the matching closing brace or bracket
+      const jsonSubstring = cleaned.substring(jsonStart);
+      const stack: string[] = [];
+      let endIndex = -1;
 
-    for (const pattern of jsonStartPatterns) {
-      const match = cleaned.match(pattern);
-      if (match) {
-        cleaned = match[0];
-        break;
-      }
-    }
-
-    // If we still don't have valid JSON, try to find JSON boundaries
-    if (!cleaned.startsWith("[") && !cleaned.startsWith("{")) {
-      const jsonStart = Math.max(cleaned.indexOf("["), cleaned.indexOf("{"));
-
-      if (jsonStart !== -1) {
-        const jsonEnd = Math.max(
-          cleaned.lastIndexOf("]"),
-          cleaned.lastIndexOf("}")
-        );
-
-        if (jsonEnd > jsonStart) {
-          cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
+      for (let i = 0; i < jsonSubstring.length; i++) {
+        const char = jsonSubstring[i];
+        if (char === "{" || char === "[") {
+          stack.push(char);
+        } else if (char === "}" && stack[stack.length - 1] === "{") {
+          stack.pop();
+          if (stack.length === 0) {
+            endIndex = i;
+            break;
+          }
+        } else if (char === "]" && stack[stack.length - 1] === "[") {
+          stack.pop();
+          if (stack.length === 0) {
+            endIndex = i;
+            break;
+          }
         }
       }
-    }
 
-    // Final cleanup - remove any trailing text after JSON
-    if (cleaned.startsWith("[")) {
-      const lastBracket = cleaned.lastIndexOf("]");
-      if (lastBracket !== -1) {
-        cleaned = cleaned.substring(0, lastBracket + 1);
-      }
-    } else if (cleaned.startsWith("{")) {
-      const lastBrace = cleaned.lastIndexOf("}");
-      if (lastBrace !== -1) {
-        cleaned = cleaned.substring(0, lastBrace + 1);
+      if (endIndex !== -1) {
+        cleaned = jsonSubstring.substring(0, endIndex + 1);
       }
     }
 
-    console.log(
-      "Cleaned response:",
-      cleaned.substring(0, 500) + (cleaned.length > 500 ? "..." : "")
-    );
+    // Final cleanup - ensure the cleaned response is valid JSON
+    if (cleaned.startsWith("[") || cleaned.startsWith("{")) {
+      try {
+        // Attempt to parse the cleaned JSON to ensure it's valid
+        JSON.parse(cleaned);
+        return cleaned;
+      } catch (e) {
+        console.error("Failed to parse cleaned JSON:", e);
+      }
+    }
 
-    return cleaned;
+    // If parsing fails, return an empty JSON object or array as a fallback
+    return cleaned.startsWith("[") ? "[]" : "{}";
   }
 
   private getSampleData(sessionData: SessionData, maxRows: number = 5): any {
