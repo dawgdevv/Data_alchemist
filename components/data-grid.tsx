@@ -411,8 +411,7 @@ export default function DataGrid({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-[#cdd6f4] flex items-center">
-            Data Preview & Editing (Wait for some seconds not much but
-            noticable)
+            Data Preview & Editing
             <Badge
               variant="outline"
               className="ml-3 bg-[#cba6f7]/20 text-[#cba6f7] border-[#cba6f7]/30"
