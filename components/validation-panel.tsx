@@ -7,10 +7,13 @@ import {
   Briefcase,
   Info,
   AlertCircle,
+  Brain,
+  TrendingUp,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from "react";
 
 interface ValidationError {
   id: string;
@@ -58,6 +61,37 @@ export default function ValidationPanel({
     0
   );
 
+  const [aiPriorities, setAiPriorities] = useState<{ [key: string]: number }>(
+    {}
+  );
+  const [showAiInsights, setShowAiInsights] = useState(false);
+
+  useEffect(() => {
+    if (validationDetails.length > 0) {
+      generateAiPriorities();
+    }
+  }, [validationDetails]);
+
+  const generateAiPriorities = async () => {
+    try {
+      const response = await fetch("/api/ai-error-prioritization", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          errors: validationDetails.slice(0, 10), // Limit for performance
+          sessionData: {}, // Pass session context if available
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setAiPriorities(result.priorities);
+      }
+    } catch (error) {
+      console.error("Failed to get AI priorities:", error);
+    }
+  };
+
   if (totalErrors === 0) return null;
 
   // Group validation details by file
@@ -66,6 +100,29 @@ export default function ValidationPanel({
     acc[error.file].push(error);
     return acc;
   }, {} as { [file: string]: ValidationError[] });
+
+  const renderErrorWithAI = (error: ValidationError) => {
+    const aiPriority = aiPriorities[error.id] || 0;
+
+    return (
+      <div className="validation-error-item">
+        {/* Your existing error display */}
+
+        {/* AI Priority Indicator */}
+        {aiPriority > 0.7 && (
+          <div className="flex items-center mt-2">
+            <Brain className="h-3 w-3 text-[#cba6f7] mr-1" />
+            <Badge className="text-xs bg-[#f38ba8]/20 text-[#f38ba8]">
+              High Impact
+            </Badge>
+            <span className="text-xs text-[#6c7086] ml-2">
+              AI suggests fixing this first
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <Card className="bg-[#f9e2af]/10 border-[#f9e2af]/30">

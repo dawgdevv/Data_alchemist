@@ -6,7 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Edit3, Check, X } from "lucide-react";
+import {
+  AlertTriangle,
+  Edit3,
+  Check,
+  X,
+  Sparkles,
+  Lightbulb,
+} from "lucide-react";
 import { useSession } from "@/hooks/use-session";
 
 interface ValidationError {
@@ -32,7 +39,8 @@ export default function DataGrid({
   validationDetails = [],
   onDataChange,
 }: DataGridProps) {
-  const { sessionData, updateSessionCell, lastValidationResult } = useSession();
+  const { sessionId, sessionData, updateSessionCell, lastValidationResult } =
+    useSession();
   const [editingCell, setEditingCell] = useState<{
     row: number;
     col: string;
@@ -41,6 +49,10 @@ export default function DataGrid({
   const [editValue, setEditValue] = useState("");
   const [hoveredError, setHoveredError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<{ [key: string]: any }>(
+    {}
+  );
+  const [showAiHints, setShowAiHints] = useState(true);
   const editInputRef = useRef<HTMLInputElement>(null);
 
   const availableTables = Object.keys(sessionData).filter(
@@ -134,6 +146,86 @@ export default function DataGrid({
       e.preventDefault();
       handleCancelEdit();
     }
+  };
+
+  // Add this function to get AI suggestions for cell editing
+  const getAiCellSuggestion = async (
+    fileType: string,
+    rowIndex: number,
+    column: string,
+    currentValue: any
+  ) => {
+    try {
+      const response = await fetch("/api/ai-cell-suggestion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          fileType,
+          rowIndex,
+          column,
+          currentValue,
+          context: {
+            rowData: data?.data[rowIndex],
+            columnData: data?.data.map((row) => row[column]),
+          },
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success && result.suggestion) {
+        const suggestionKey = `${fileType}-${rowIndex}-${column}`;
+        setAiSuggestions((prev) => ({
+          ...prev,
+          [suggestionKey]: result.suggestion,
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to get AI suggestion:", error);
+    }
+  };
+
+  const renderCell = (value: any, rowIndex: number, column: string) => {
+    const suggestionKey = `${fileType}-${rowIndex}-${column}`;
+    const aiSuggestion = aiSuggestions[suggestionKey];
+
+    return (
+      <div className="relative group">
+        {/* Your existing cell content */}
+        <div className="cell-content">{value}</div>
+
+        {/* AI Suggestion Overlay */}
+        {aiSuggestion && showAiHints && (
+          <div className="absolute -top-2 -right-2 z-10">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-6 w-6 p-0 bg-[#cba6f7] text-[#1e1e2e] rounded-full hover:bg-[#cba6f7]/90"
+              onClick={() =>
+                applySuggestion(rowIndex, column, aiSuggestion.value)
+              }
+            >
+              <Sparkles className="h-3 w-3" />
+            </Button>
+
+            <div className="absolute top-8 right-0 w-64 p-3 bg-[#313244] border border-[#45475a] rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center mb-2">
+                <Lightbulb className="h-4 w-4 text-[#f9e2af] mr-2" />
+                <span className="text-xs font-medium text-[#cdd6f4]">
+                  AI Suggestion
+                </span>
+              </div>
+              <p className="text-xs text-[#6c7086] mb-2">
+                {aiSuggestion.reasoning}
+              </p>
+              <Badge className="text-xs bg-[#a6e3a1]/20 text-[#a6e3a1]">
+                {Math.round(aiSuggestion.confidence * 100)}% confidence
+              </Badge>
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   const renderTable = (tableKey: string) => {

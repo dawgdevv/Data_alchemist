@@ -8,13 +8,13 @@ W6,Frank Miller,"PHP,MySQL,Laravel","[1,4,7]",2,BackEnd,Mid
 W7,Grace Lee,"UI/UX,Figma,Design","[2,5,6]",1,Design,Senior
 W8,Henry Taylor,"Python,Django,PostgreSQL","[1,2,4,5]",3,BackEnd,Senior
 W9,Ivy Chen,"JavaScript,Node.js,MongoDB","[3,6,7]",2,FullStack,Mid
-W8,Jack Robinson,"C#,.NET,Azure","[1,5,6]",2,TechTeam,Senior
+W10,Jack Robinson,"C#,.NET,Azure","[1,5,6]",2,TechTeam,Senior
 W11,Karen White,"Project Management,Agile,Scrum","[2,3,4]",5,Management,Expert
 W12,Leo Garcia,"Data Analysis,Excel,PowerBI","[1,4,6]",2,DataTeam,Mid
 W13,Mia Anderson,"Quality Assurance,Testing,Selenium","[2,5,7]",3,QA,Senior
 W14,Nick Thompson,"Security,Penetration Testing,CISSP","[3,4,6]",2,Security,Expert
 W15,Olivia Martinez,"Marketing,Content,SEO","[1,3,5]",6,Marketing,Mid
-W16,Paul Johnson,"Sales,CRM,Negotiation","malformed_array",2,Sales,Senior
+W16,Paul Johnson,"Sales,CRM,Negotiation","[2,4,6]",2,Sales,Senior
 W17,Quinn Davis,"HR,Recruitment,Training","[1,6,7]",1,HR,Mid
 W18,Rachel Green,"Finance,Accounting,Budget","[3,5,6]",2,Finance,Senior
 W19,Sam Wilson,"Legal,Compliance,Contracts","[1,2,4]",1,Legal,Expert
@@ -38,4 +38,9 @@ W36,Jake Murphy,"Python,Flask,FastAPI","[1,3,4,5]",5,BackEnd,Senior
 W37,Kelly Ross,"React Native,Flutter,Hybrid Apps","[2,4,7]",2,Mobile,Mid
 W38,Liam Scott,"Machine Learning,TensorFlow,PyTorch","[1,5,6,7]",4,ML,Expert
 W39,Maya Rivera,"Business Analysis,Requirements,Process","[2,3,5]",3,Business,Senior
-W40,Noah Cook,"Full Stack,MEAN,MERN","[1,4,6,7]",0,FullStack,Senior
+W40,Noah Cook,"Full Stack,MEAN,MERN","[1,4,6,7]",3,FullStack,Senior
+W41,Sophie Chen,"Data Engineering,ETL,Spark","[1,3,5]",2,DataTeam,Senior
+W42,Test Worker,"Python,Testing","[]",1,TestTeam,Junior
+W43,Max Capacity,"Full Stack,Everything","[1,2,3,4,5,6,7]",10,AllTeams,Expert
+W44,Empty Skills,"","[1,2,3]",2,NoSkills,Mid
+W45,Invalid Phase,"JavaScript,React","[1,2,8]",3,Frontend,Senior

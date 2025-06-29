@@ -1,0 +1,16 @@
+TestCaseID,TestType,Description,ExpectedIssue,Severity
+TC001,Worker,Empty available slots,"W42 has empty AvailableSlots []",Medium
+TC002,Worker,Invalid phase reference,"W45 has phase 8 which doesn't exist",High
+TC003,Worker,Empty skills,"W44 has no skills defined",Medium
+TC004,Worker,Excessive capacity,"W43 has unrealistic MaxLoadPerPhase of 10",Low
+TC005,Task,Zero duration,"T61 has 0 duration",Medium
+TC006,Task,Excessive concurrency,"T62 has MaxConcurrent of 20",Medium
+TC007,Task,Empty skills,"T63 has no required skills",High
+TC008,Task,Invalid phase,"T64 references phase 9",High
+TC009,Client,Invalid task reference,"C33 references T61 (test task)",Medium
+TC010,Client,Invalid task reference,"C42 references T62 (test task)",Medium
+TC011,Client,Invalid task reference,"C45 references T63 (test task)",Medium
+TC012,Data,Duplicate references,"Multiple clients reference same tasks",Low
+TC013,Data,Orphaned references,"Tasks not referenced by any client",Low
+TC014,Data,Missing references,"Clients reference non-existent tasks",High
+TC015,JSON,Malformed JSON,"Some AttributesJSON fields are plain text",Medium

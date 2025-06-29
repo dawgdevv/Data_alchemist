@@ -13,7 +13,12 @@ interface SessionData {
 
 export async function POST(request: NextRequest) {
   try {
-    const { sessionId, suggestions, autoApply = false } = await request.json();
+    const {
+      sessionId,
+      suggestions,
+      autoApply = false,
+      fixType,
+    } = await request.json();
 
     if (!sessionId) {
       return NextResponse.json(
@@ -23,6 +28,25 @@ export async function POST(request: NextRequest) {
     }
 
     const sessionData = await getSession(sessionId);
+
+    // Handle specific JSON fix type
+    if (fixType === "json" && autoApply) {
+      const result = await fixJSONFields(sessionData);
+
+      // Update session with fixed data
+      for (const [fileType, data] of Object.entries(result.correctedData)) {
+        if (sessionData[fileType]) {
+          await updateSessionFile(sessionId, fileType, data);
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: "JSON fields fixed successfully",
+        fixedCount: result.fixedCount,
+        correctedFiles: Object.keys(result.correctedData),
+      });
+    }
 
     if (autoApply && suggestions && Array.isArray(suggestions)) {
       // Apply AI suggestions to data
@@ -129,4 +153,94 @@ async function applyCorrections(sessionData: SessionData, suggestions: any[]) {
   }
 
   return correctedData;
+}
+
+// ✅ JSON Fix Function
+async function fixJSONFields(sessionData: SessionData): Promise<{
+  correctedData: SessionData;
+  fixedCount: number;
+}> {
+  const correctedData = { ...sessionData };
+  let fixedCount = 0;
+
+  Object.keys(sessionData).forEach((fileType) => {
+    const fileData = sessionData[fileType];
+    if (!fileData || !fileData.data) return;
+
+    // Look for JSON fields (typically AttributesJSON in clients)
+    const jsonColumns = fileData.headers.filter(
+      (header) =>
+        header.toLowerCase().includes("json") ||
+        header.toLowerCase().includes("attributes")
+    );
+
+    if (jsonColumns.length > 0) {
+      const correctedRows = fileData.data.map((row) => {
+        const newRow = { ...row };
+
+        jsonColumns.forEach((column) => {
+          const value = row[column];
+          if (value && typeof value === "string" && !isValidJSON(value)) {
+            // Try to fix common JSON issues
+            const fixed = fixJSONString(value);
+            if (fixed !== value) {
+              newRow[column] = fixed;
+              fixedCount++;
+            }
+          }
+        });
+
+        return newRow;
+      });
+
+      correctedData[fileType] = {
+        ...fileData,
+        data: correctedRows,
+      };
+    }
+  });
+
+  return { correctedData, fixedCount };
+}
+
+// Helper function to check if string is valid JSON
+function isValidJSON(str: string): boolean {
+  try {
+    JSON.parse(str);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Helper function to fix common JSON issues
+function fixJSONString(str: string): string {
+  // Remove common prefixes that break JSON
+  let fixed = str.trim();
+
+  // Fix common issues
+  if (!fixed.startsWith("{") && !fixed.startsWith("[")) {
+    // If it doesn't start with { or [, try to wrap it
+    if (fixed.includes(":")) {
+      fixed = `{${fixed}}`;
+    } else {
+      fixed = `"${fixed}"`;
+    }
+  }
+
+  // Fix unquoted keys
+  fixed = fixed.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+
+  // Fix single quotes to double quotes
+  fixed = fixed.replace(/'/g, '"');
+
+  // Fix trailing commas
+  fixed = fixed.replace(/,(\s*[}\]])/g, "$1");
+
+  // Validate the fix
+  if (isValidJSON(fixed)) {
+    return fixed;
+  }
+
+  return str; // Return original if we can't fix it
 }

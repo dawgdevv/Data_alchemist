@@ -12,9 +12,8 @@ import PrioritizationPanel from "@/components/prioritization-panel";
 import ExportPanel from "@/components/export-panel";
 import AIAssistant from "@/components/ai-assistant";
 import { useSession } from "@/hooks/use-session";
-import Link from "next/link";
+
 import SessionManager from "@/components/session-manager";
-import RedisDebug from "@/components/redis-debug";
 
 interface ValidationError {
   id: string;
@@ -46,6 +45,17 @@ export default function DataAlchemist() {
     []
   );
   const [rules, setRules] = useState<any[]>([]);
+  const [prioritizationData, setPrioritizationData] = useState({
+    weights: {
+      priorityLevel: 8,
+      taskFulfillment: 7,
+      fairnessConstraints: 6,
+      workerUtilization: 5,
+      phaseBalance: 4,
+      skillOptimization: 6,
+    },
+    profile: "custom",
+  });
 
   // All useEffect hooks should also be declared unconditionally
   useEffect(() => {
@@ -155,6 +165,55 @@ export default function DataAlchemist() {
       : null,
   };
 
+  // ✅ Get data insights for better prioritization context (non-intrusive)
+  const getDataInsights = () => {
+    if (!Object.keys(sessionData).length) return null;
+
+    const insights = {
+      totalClients: sessionData?.clients?.data?.length || 0,
+      totalWorkers: sessionData?.workers?.data?.length || 0,
+      totalTasks: sessionData?.tasks?.data?.length || 0,
+      avgPriorityLevel: 0,
+      totalTaskRequests: 0,
+      uniqueSkills: 0,
+    };
+
+    if (sessionData?.clients?.data) {
+      insights.avgPriorityLevel =
+        Math.round(
+          (sessionData.clients.data.reduce(
+            (sum: number, c: any) => sum + (parseInt(c.PriorityLevel) || 0),
+            0
+          ) /
+            sessionData.clients.data.length) *
+            10
+        ) / 10;
+
+      insights.totalTaskRequests = sessionData.clients.data.reduce(
+        (sum: number, c: any) =>
+          sum + (c.RequestedTaskIDs?.split(",").length || 0),
+        0
+      );
+    }
+
+    if (sessionData?.tasks?.data && sessionData?.workers?.data) {
+      const allSkills = new Set([
+        ...sessionData.tasks.data.flatMap(
+          (t: any) =>
+            t.RequiredSkills?.split(",").map((s: string) => s.trim()) || []
+        ),
+        ...sessionData.workers.data.flatMap(
+          (w: any) => w.Skills?.split(",").map((s: string) => s.trim()) || []
+        ),
+      ]);
+      insights.uniqueSkills = allSkills.size;
+    }
+
+    return insights;
+  };
+
+  const dataInsights = getDataInsights();
+
   return (
     <div className="min-h-screen bg-[#1e1e2e] text-[#cdd6f4] font-mono">
       {/* Header */}
@@ -174,6 +233,42 @@ export default function DataAlchemist() {
             </div>
           </div>
           <div className="flex items-center space-x-3">
+            {/* ✅ Subtle Data Insights - Only show when data exists, non-intrusive */}
+            {dataInsights && (
+              <div className="hidden md:flex items-center space-x-4 text-xs text-[#6c7086] border-r border-[#313244] pr-4">
+                <span className="flex items-center">
+                  <span className="w-2 h-2 bg-[#a6e3a1] rounded-full mr-1"></span>
+                  {dataInsights.totalClients} Clients
+                </span>
+                <span className="flex items-center">
+                  <span className="w-2 h-2 bg-[#89b4fa] rounded-full mr-1"></span>
+                  {dataInsights.totalWorkers} Workers
+                </span>
+                <span className="flex items-center">
+                  <span className="w-2 h-2 bg-[#fab387] rounded-full mr-1"></span>
+                  {dataInsights.totalTasks} Tasks
+                </span>
+                {dataInsights.avgPriorityLevel > 0 && (
+                  <span className="flex items-center">
+                    <span className="w-2 h-2 bg-[#f9e2af] rounded-full mr-1"></span>
+                    ~{dataInsights.avgPriorityLevel} Average Priority
+                  </span>
+                )}
+                {dataInsights.totalTaskRequests > 0 && (
+                  <span className="flex items-center">
+                    <span className="w-2 h-2 bg-[#f38ba8] rounded-full mr-1"></span>
+                    {dataInsights.totalTaskRequests} Task Requests
+                  </span>
+                )}
+                {dataInsights.uniqueSkills > 0 && (
+                  <span className="flex items-center">
+                    <span className="w-2 h-2 bg-[#cba6f7] rounded-full mr-1"></span>
+                    {dataInsights.uniqueSkills} Unique Skills
+                  </span>
+                )}
+              </div>
+            )}
+
             {totalErrors > 0 && (
               <Badge
                 variant="destructive"
@@ -255,6 +350,8 @@ export default function DataAlchemist() {
               Export
             </Button>
           </nav>
+
+          {/* ✅ Optional: Small insights in sidebar (even more subtle) */}
         </aside>
 
         {/* Main Content */}
@@ -262,7 +359,6 @@ export default function DataAlchemist() {
           <div className="flex-1 overflow-auto p-6">
             {activeTab === "upload" && (
               <div className="space-y-6">
-                <RedisDebug />
                 <div>
                   <h2 className="text-2xl font-bold text-[#f38ba8] mb-2">
                     Upload Your Data Files
@@ -321,8 +417,17 @@ export default function DataAlchemist() {
                   </p>
                 </div>
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  <RuleBuilder rules={rules} setRules={setRules} />
-                  <PrioritizationPanel />
+                  <RuleBuilder
+                    rules={rules}
+                    setRules={setRules}
+                    sessionData={sessionData}
+                    prioritizationData={prioritizationData}
+                  />
+                  <PrioritizationPanel
+                    prioritizationData={prioritizationData}
+                    setPrioritizationData={setPrioritizationData}
+                    sessionData={sessionData}
+                  />
                 </div>
               </div>
             )}

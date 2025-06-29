@@ -51,12 +51,14 @@ interface RuleBuilderProps {
   rules: Rule[];
   setRules: (rules: Rule[]) => void;
   sessionData?: any;
+  prioritizationData?: any; // Add this prop to receive prioritization weights
 }
 
 export default function RuleBuilder({
   rules,
   setRules,
   sessionData,
+  prioritizationData, // Destructure the new prop
 }: RuleBuilderProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingRule, setEditingRule] = useState<string | null>(null);
@@ -72,12 +74,7 @@ export default function RuleBuilder({
 
   // Get dynamic data from session
   const getTaskIds = () =>
-    sessionData?.tasks?.data?.map((t: any) => t.TaskID) || [
-      "T001",
-      "T002",
-      "T003",
-      "T004",
-    ];
+    sessionData?.tasks?.data?.map((t: any) => t.TaskID) || [];
   const getWorkerGroups = () =>
     [
       ...new Set(sessionData?.workers?.data?.map((w: any) => w.WorkerGroup)),
@@ -151,25 +148,89 @@ export default function RuleBuilder({
   };
 
   const exportRules = () => {
-    const rulesConfig = {
-      version: "1.0",
-      generated: new Date().toISOString(),
-      rules: rules.map((rule) => ({
-        id: rule.id,
-        type: rule.type,
-        name: rule.name,
-        config: rule.config,
-        priority: rule.priority || 1,
-        aiGenerated: rule.aiGenerated || false,
-      })),
-      metadata: {
-        totalRules: rules.length,
-        aiGeneratedRules: rules.filter((r) => r.aiGenerated).length,
-        ruleTypes: [...new Set(rules.map((r) => r.type))],
-      },
+    const finalConfig: any = {
+      coRunRules: [],
+      slotRestrictions: [],
+      loadLimits: [],
+      phaseWindows: [],
+      patternMatchRules: [],
+      precedenceOverrides: [],
+      prioritization: {},
     };
 
-    const blob = new Blob([JSON.stringify(rulesConfig, null, 2)], {
+    rules.forEach((rule) => {
+      switch (rule.type) {
+        case "co-run":
+          finalConfig.coRunRules.push({
+            type: "coRun",
+            tasks: rule.config.taskIds || [],
+            ...rule.config,
+          });
+          break;
+        case "slot-restriction":
+          finalConfig.slotRestrictions.push({
+            type: "slotRestriction",
+            group: rule.config.targetGroup,
+            minCommonSlots: rule.config.minCommonSlots,
+            ...rule.config,
+          });
+          break;
+        case "load-limit":
+          finalConfig.loadLimits.push({
+            type: "loadLimit",
+            workerGroup: rule.config.workerGroup,
+            maxSlotsPerPhase: rule.config.maxSlotsPerPhase,
+            ...rule.config,
+          });
+          break;
+        case "phase-window":
+          finalConfig.phaseWindows.push({
+            type: "phaseWindow",
+            taskId: rule.config.taskId,
+            allowedPhases: rule.config.allowedPhases
+              ?.split(/[, -]+/)
+              .map((p: string) => parseInt(p.trim()))
+              .filter(Number.isInteger),
+            ...rule.config,
+          });
+          break;
+        case "pattern-match":
+          finalConfig.patternMatchRules.push({
+            type: "patternMatch",
+            regex: rule.config.pattern,
+            template: rule.config.actionTemplate,
+            params: {
+              // This is an example, you may need more specific UI fields for this
+              taskIds: rule.config.taskIds || [],
+            },
+            ...rule.config,
+          });
+          break;
+        case "precedence-override":
+          // This structure is complex and may need more specific UI fields
+          finalConfig.precedenceOverrides.push({
+            type: "precedenceOverride",
+            globalRulePriority: rule.config.globalRulePriority || [],
+            specificOverrides: rule.config.specificOverrides || [],
+            ...rule.config,
+          });
+          break;
+      }
+    });
+
+    // Integrate prioritization data if available
+    if (prioritizationData) {
+      finalConfig.prioritization = {
+        priorityLevelWeight: prioritizationData.weights?.priorityLevel,
+        requestedTaskFulfillmentWeight:
+          prioritizationData.weights?.taskFulfillment,
+        fairnessConstraintWeight:
+          prioritizationData.weights?.fairnessConstraints,
+        presetProfile: prioritizationData.profile,
+      };
+    }
+
+    const blob = new Blob([JSON.stringify(finalConfig, null, 2)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);

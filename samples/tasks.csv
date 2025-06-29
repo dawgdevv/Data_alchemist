@@ -13,7 +13,7 @@ T11,Performance Optimization,Backend,3,"Python,Database,Performance","[3,4]",2
 T12,Security Audit,Security,5,"Security,Penetration Testing,Compliance","[2,3]",1
 T13,Content Management System,FullStack,7,"Python,JavaScript,Database","[1,2,4]",2
 T14,Email Marketing Campaign,Marketing,2,"Marketing,Content,Analytics","[3,4]",4
-T15,Customer Support Portal,Frontend,0,"React,JavaScript,UI/UX","[2,3]",2
+T15,Customer Support Portal,Frontend,4,"React,JavaScript,UI/UX","[2,3]",2
 T16,Inventory Management,Backend,6,"Python,Database,API","[1,3]",1
 T17,Social Media Integration,Frontend,3,"JavaScript,API,Social Media","[2,4]",3
 T18,Backup and Recovery System,Infrastructure,5,"DevOps,Database,Cloud","[1,2]",1
@@ -29,7 +29,7 @@ T27,Search Functionality,Backend,5,"Python,Search,Database","[2,4]",2
 T28,Notification System,Backend,3,"Python,API,Messaging","[3,4]",3
 T29,Data Visualization,Frontend,4,"JavaScript,Charts,Data Visualization","[2,3]",2
 T30,Multi-tenant Architecture,Backend,8,"Python,Architecture,Database","[1,2]",1
-T30,Third-party Integrations,Backend,5,"API,Integration,Python","[2,3,4]",2
+T31,Third-party Integrations,Backend,5,"API,Integration,Python","[2,3,4]",2
 T32,Automated Testing Suite,Testing,6,"Testing,Automation,CI/CD","[3,4]",2
 T33,User Permission System,Security,4,"Security,Database,Authorization","[1,3]",2
 T34,Error Monitoring,DevOps,3,"DevOps,Monitoring,Logging","[4,5]",3
@@ -54,8 +54,12 @@ T52,Customer Analytics,DataScience,5,"Analytics,Customer Data,Statistics","[2,4]
 T53,Recommendation Engine,AI,9,"Recommendation,Machine Learning,AI","[1,3]",1
 T54,Video Streaming,Multimedia,7,"Video,Streaming,CDN","[2,3]",2
 T55,Geolocation Services,Backend,4,"Geolocation,Maps,API","[1,4]",2
-T56,Code Review Automation,DevOps,3,"NonExistentSkill,Automation,CI/CD","[3,5]",3
+T56,Code Review Automation,DevOps,3,"Code Review,Automation,CI/CD","[3,5]",3
 T57,Health Check Monitoring,DevOps,2,"Monitoring,Health Check,Alerts","[4,5]",4
 T58,Dynamic Configuration,Backend,3,"Configuration,Dynamic,Backend","[2,4]",3
 T59,Rate Limiting,Security,2,"Rate Limiting,Security,API","[3,4]",4
 T60,Data Archival,Database,4,"Data Archival,Database,Storage","[1,5]",2
+T61,Test Task Zero Duration,Testing,0,"Testing,QA","[1,2]",1
+T62,High Concurrency Task,Performance,2,"Performance,Load Testing","[1,2,3,4,5]",20
+T63,Missing Skills Task,Backend,3,"","[2,3]",2
+T64,Invalid Phase Task,Frontend,4,"React,JavaScript","[1,2,9]",3

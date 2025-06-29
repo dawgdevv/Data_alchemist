@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   getSession,
+  setSession,
   updateSessionFile,
   debugSession,
-  setSession,
 } from "@/lib/session-store-redis";
 
 interface ValidationError {
@@ -460,107 +460,65 @@ export async function POST(request: NextRequest) {
 
     if (!sessionId || !fileType || !data) {
       return NextResponse.json(
-        { error: "SessionId, fileType, and data are required" },
+        { error: "sessionId, fileType, and data are required" },
         { status: 400 }
       );
     }
 
     console.log(`=== UPDATE SESSION START ===`);
-    console.log(`Session: ${sessionId}, File: ${fileType}`);
+    console.log(`Session: ${sessionId}, File to update: ${fileType}`);
 
-    // Debug: Check session state before update
-    await debugSession(sessionId);
-
-    // Get current session state before update
-    const beforeUpdate = await getSession(sessionId);
+    // Get current session state from Redis
+    let backendSession = await getSession(sessionId);
     console.log(
-      `Before update - Backend session files:`,
-      Object.keys(beforeUpdate)
+      `Backend session files before update:`,
+      Object.keys(backendSession)
     );
 
-    // If frontend sent allSessionData as backup, use it to restore missing files
-    if (
-      allSessionData &&
-      Object.keys(beforeUpdate).length < Object.keys(allSessionData).length
-    ) {
-      console.log(
-        `Frontend has more files than backend, restoring from frontend data`
-      );
-      console.log(`Frontend files:`, Object.keys(allSessionData));
-      console.log(`Backend files:`, Object.keys(beforeUpdate));
-
-      // Restore missing files from frontend
-      const missingFiles = Object.keys(allSessionData).filter(
-        (file) => !beforeUpdate[file] && file !== fileType
+    // If frontend sent a backup and it has more files, restore missing ones
+    if (allSessionData) {
+      const frontendFiles = Object.keys(allSessionData);
+      const backendFiles = Object.keys(backendSession);
+      const missingFiles = frontendFiles.filter(
+        (f) => !backendFiles.includes(f)
       );
 
       if (missingFiles.length > 0) {
-        console.log(`Restoring missing files:`, missingFiles);
-        // Set the complete session data
-        await setSession(sessionId, allSessionData);
+        console.warn(
+          `Restoring missing files from frontend backup:`,
+          missingFiles
+        );
+        for (const missingFile of missingFiles) {
+          backendSession[missingFile] = allSessionData[missingFile];
+        }
+        // Persist the restored session immediately to prevent race conditions
+        await setSession(sessionId, backendSession);
       }
     }
 
-    // Now update the specific file
-    const sessionData = await updateSessionFile(sessionId, fileType, data);
+    // Now, update the specific file with the new data
+    const updatedSessionData = await updateSessionFile(
+      sessionId,
+      fileType,
+      data
+    );
 
-    // Debug: Check session state after update
     console.log(
-      `After update - Backend session files:`,
-      Object.keys(sessionData)
+      `Backend session files after update:`,
+      Object.keys(updatedSessionData)
     );
     await debugSession(sessionId);
 
-    // Final verification - ensure we have all expected files
-    const expectedFiles = ["clients", "workers", "tasks"];
-    const presentFiles = Object.keys(sessionData);
-    const missingFiles = expectedFiles.filter((file) => !sessionData[file]);
-
-    if (missingFiles.length > 0 && allSessionData) {
-      console.warn(
-        `Some expected files missing, attempting recovery:`,
-        missingFiles
-      );
-      // Try to recover from allSessionData
-      const recoveredData = { ...sessionData };
-      missingFiles.forEach((file) => {
-        if (allSessionData[file]) {
-          recoveredData[file] = allSessionData[file];
-          console.log(`Recovered file: ${file}`);
-        }
-      });
-
-      if (Object.keys(recoveredData).length > Object.keys(sessionData).length) {
-        setSession(sessionId, recoveredData);
-        console.log(
-          `Recovery successful, final files:`,
-          Object.keys(recoveredData)
-        );
-      }
-    }
-
-    // Get final session data
-    const finalSessionData = await getSession(sessionId);
-    console.log(`Final session data files:`, Object.keys(finalSessionData));
-
-    // Run validation on updated data
-    const validationEngine = new ValidationEngine(finalSessionData);
+    // Run validation on the final, complete data
+    const validationEngine = new ValidationEngine(updatedSessionData);
     const validationResult = validationEngine.validate();
 
     console.log(`=== UPDATE SESSION END ===`);
 
     return NextResponse.json({
       success: true,
-      sessionData: finalSessionData,
+      sessionData: updatedSessionData,
       validation: validationResult,
-      debug: {
-        updatedFile: fileType,
-        totalFiles: Object.keys(finalSessionData).length,
-        files: Object.keys(finalSessionData),
-        beforeUpdateFiles: Object.keys(beforeUpdate),
-        afterUpdateFiles: Object.keys(finalSessionData),
-        hadFrontendBackup: !!allSessionData,
-      },
     });
   } catch (error) {
     console.error("Update session error:", error);
