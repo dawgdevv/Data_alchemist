@@ -390,7 +390,7 @@ export default function DataAlchemist() {
               <div className="space-y-6">
                 <div>
                   <h2 className="text-2xl font-bold text-[#a6e3a1] mb-2">
-                    Data Grid(Wait for some seconds not much but noticable)
+                    Data Grid(Wait for 1-2 seconds to load)
                   </h2>
                   <p className="text-[#6c7086] mb-6">
                     Review and edit your uploaded data. Click on any cell to
